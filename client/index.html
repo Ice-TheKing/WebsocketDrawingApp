@@ -1,13 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
-    <script type="text/babel" >
-        "use strict";
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
+  <script type="text/babel" >
+
+    "use strict";
+
+    let socket;
     
-    </script>
+    const setupSocket = () => {
+      socket.on('updateNum', (data) => {
+        console.dir('updating num...');
+        console.dir(data);
+        
+        const updatedNum = data.num;
+        document.querySelector("#num").innerHTML = updatedNum;
+      });
+      
+      socket.on('clearNum', (data) => {
+         document.querySelector("#num").innerHTML = "";
+      });
+    }
+    
+    const sendNumToServer = () => {
+      let newNum = document.querySelector("#newNum").value;
+      
+      let data = {
+        newNum
+      };
+      
+      socket.emit('updateServerNum', data);
+    }
+    
+    const init = () => {
+      socket = io.connect();
+      
+      setupSocket();
+      
+      const sendNumBtn = document.querySelector("#send");
+      sendNumBtn.addEventListener('click', sendNumToServer);
+    }
+    
+    window.onload = init;
+  </script>
 </head>
 <body>
-
+  <label for="newNum">New Number:</label>
+  <input id="newNum" name="newNum" type="text"/>
+  <input id="send" type="button" value="send" />
+  <p id="num">0</p>
 </body>
 </html>
