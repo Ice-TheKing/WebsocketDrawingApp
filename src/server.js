@@ -42,8 +42,11 @@ const onUpdateNum = (sock) => {
     console.dir(data);
     globalNum = data.newNum;
     
-    // TODO: broadcast correctly to all connected sockets. Right now this ain't doing shit
-    socket.broadcast.to(ENUMS.connections).emit('updateNum', { globalNum })
+    // socket references the current client emitting, so this will change all but the client sending the info
+    // socket.broadcast.to(ENUMS.connections).emit('updateNum', { num: globalNum });
+    
+    // this emits to all sockets, including the current client
+    io.sockets.emit('updateNum', { num: globalNum });
   });
 };
 
