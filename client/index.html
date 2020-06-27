@@ -7,7 +7,99 @@
 
     "use strict";
 
+    /*
+    So I was tempted to redraw the canvas every single frame, right? But that's ridiculous. Let's say the active users have millions of strokes...
+    no client should have to redraw a million strokes every frame. So instead, what if every time someone makes a stroke,
+    it sends that stroke to the server, the server adds it to a draw queue, then sends only that newest update/stroke to all the current active
+    clients.
+    So then whenever a NEW client connects, the server sends the full draw queue, the new client fills out the canvas with everything drawn so far
+    (it will be in order since it's all saved in a queue), then it won't need to recieve that full queue anymore, and can just get live updates
+    from other clients from then on.    
+    */
+
+    // Getting tablet pen pressure: 
+    // https://stackoverflow.com/questions/10507341/can-i-recognise-graphic-tablet-pen-pressure-in-javascript
+    // http://www.wacomeng.com/web/index.html
+
+    // Saving canvas to png:
+    // https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL
+
+    // undo/redo library:
+    // https://codepen.io/abidibo/pen/rmGBc
+
+    // color picker info:
+    // https://www.w3schools.com/colors/colors_picker.asp
+    // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/color
+
+
     let socket;
+
+    const DRAW_CONSTS = {
+      DEFAULT_LINE_WIDTH: 3,
+      DEFAULT_STROKE_STYLE: "#ff0000",
+      DEFAULT_LINE_CAP: "round",
+      DEFAULT_LINE_JOIN: "round",
+      DEFAULT_GRID_COLOR: "lightgray",
+      DEFAULT_GRID_SIZE: 10
+    };
+
+    let drawGlobals = {
+      canvas: null,
+      ctx: null,
+      dragging: false,
+      lineWidth: null,
+      strokeStyle: null,
+      
+      changeLineWidth: (e) => {
+        drawGlobals.lineWidth = e.target.value;
+      },
+      
+      changeStrokeColor: (e) => {
+        drawGlobals.strokeStyle = e.target.value;
+      },
+      
+      clearCanvas: (e) => {
+        drawGlobals.ctx.clearRect(0, 0, drawGlobals.ctx.canvas.width, drawGlobals.ctx.canvas.height);
+		drawGrid(drawGlobals.ctx, DRAW_CONSTS.DEFAULT_GRID_COLOR, DRAW_CONSTS.DEFAULT_GRID_SIZE);
+      },
+    };
+
+    let mouse = {
+      getMouse: (e) => {
+        let mouseLocation = {}
+		mouseLocation.x = e.pageX - e.target.offsetLeft;
+		mouseLocation.y = e.pageY - e.target.offsetTop;
+		return mouseLocation;
+      },
+      mouseDown : (e) => {
+        drawGlobals.dragging = true;
+        let mouseLocation = mouse.getMouse(e);
+        drawGlobals.ctx.beginPath();
+        drawGlobals.ctx.moveTo(mouseLocation.x, mouseLocation.y);
+      },
+      mouseMove : (e) => {
+        if (!drawGlobals.dragging) return;
+        
+        // TODO: check if the server just updated the canvas. If they did, you'll have to set moveTo to the previous mouse location
+        // otherwise if home boy draws something on the other side of the screen while you're drawing,
+        // it'll draw a nasty looking line all the way across canvas
+        
+        let mouseLocation = mouse.getMouse(e);
+        drawGlobals.ctx.strokeStyle = drawGlobals.strokeStyle;
+        drawGlobals.ctx.lineWidth = drawGlobals.lineWidth;
+        drawGlobals.ctx.lineTo(mouseLocation.x, mouseLocation.y);
+        drawGlobals.ctx.stroke();
+        
+        // TODO: save mouse x and y as previous mouse location, so if home girl draws something
+        // while you're drawing, your canvas won't freak out and draw a line across the screen.
+      },
+      mouseUp: (e) => {
+        drawGlobals.dragging = false;
+      },
+      mouseOut: (e) => {
+        drawGlobals.dragging = false;
+      }
+    };
     
     const setupSocket = () => {
       socket.on('updateNum', (data) => {
@@ -33,22 +125,107 @@
       socket.emit('updateServerNum', data);
     }
     
+    let drawGrid = (ctx, color, gridSize) => {
+      // save the current drawing state as it existed before this function was called
+      ctx.save()
+      
+      // set some drawing state variables
+      ctx.strokeStyle = color;
+      ctx.fillStyle = '#ffffff';
+      ctx.lineWidth = 0.5;
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      
+      // vertical lines
+      for (let x = gridSize + 0.5; x < ctx.canvas.width; x += gridSize) {
+      	ctx.beginPath();
+      	ctx.moveTo(x, 0);
+      	ctx.lineTo(x, ctx.canvas.height);
+      	ctx.stroke();
+      }
+      
+      // TODO: horizontal lines
+      for (let y = gridSize + 0.5; y < ctx.canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(ctx.canvas.width, y);
+        ctx.stroke();
+      }
+      
+      // restore the drawing state
+      ctx.restore();
+	};
+    
     const init = () => {
+      /* INIT SOCKET */
       socket = io.connect();
       
       setupSocket();
       
       const sendNumBtn = document.querySelector("#send");
       sendNumBtn.addEventListener('click', sendNumToServer);
+      
+      /* INIT CANVAS/DRAW APP */
+      // Init Canvas
+      drawGlobals.canvas = document.querySelector('#mainCanvas');
+      drawGlobals.ctx = drawGlobals.canvas.getContext('2d');
+      drawGlobals.lineWidth = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
+      drawGlobals.strokeStyle = DRAW_CONSTS.DEFAULT_STROKE_STYLE;
+      
+      drawGlobals.ctx.lineWidth = drawGlobals.lineWidth;
+      drawGlobals.ctx.strokeStyle = drawGlobals.strokeStyle;
+      drawGlobals.ctx.lineCap = DRAW_CONSTS.DEFAULT_LINE_CAP;
+      drawGlobals.ctx.lineJoin = DRAW_CONSTS.DEFAULT_LINE_JOIN;
+      
+      drawGrid(drawGlobals.ctx, DRAW_CONSTS.DEFAULT_GRID_COLOR, DRAW_CONSTS.DEFAULT_GRID_SIZE, DRAW_CONSTS.DEFAULT_GRID_SIZE);
+      
+      // Mouse event listeners
+      drawGlobals.canvas.onmousedown = mouse.mouseDown;
+      drawGlobals.canvas.onmousemove = mouse.mouseMove;
+      drawGlobals.canvas.onmouseup = mouse.mouseUp;
+      drawGlobals.canvas.onmouseout = mouse.mouseOut;
+      // Other listeners
+      document.querySelector('#lineWidthSelector').onchange = drawGlobals.changeLineWidth;
+      document.querySelector('#colorPicker').onchange = drawGlobals.changeStrokeColor;
+      document.querySelector('#clearButton').addEventListener('click', drawGlobals.clearCanvas);
     }
     
     window.onload = init;
   </script>
 </head>
+  
 <body>
   <label for="newNum">New Number:</label>
   <input id="newNum" name="newNum" type="text"/>
   <input id="send" type="button" value="send" />
   <p id="num">0</p>
+  <canvas id="mainCanvas" width="700" height="500">
+    Use a browser compatible with Canvas (probably, just update your browser)
+  </canvas>
+  <div id="controls">
+    <label>Tool:
+      <select id="toolChooser">
+        <option value="toolPencil">Pencil</option>
+      </select>
+    </label>	
+    <label>Line Width: 
+      <select id="lineWidthSelector">
+		<option value="1">1</option>
+		<option value="2">2</option>
+        <option value="3" selected>3</option>
+        <option value="4">4</option>
+		<option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+		<option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+      </select>
+    </label>
+    <label>Stroke Color:
+      <input type="color" value="#ff0000" id="colorPicker"/>
+    </label>
+    	
+    <span><input id="clearButton" type="button" value="Clear"/></span>
+  </div>
 </body>
 </html>
