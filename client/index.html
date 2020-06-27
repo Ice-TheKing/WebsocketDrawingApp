@@ -39,8 +39,7 @@
       DEFAULT_STROKE_STYLE: "#ff0000",
       DEFAULT_LINE_CAP: "round",
       DEFAULT_LINE_JOIN: "round",
-      DEFAULT_GRID_COLOR: "lightgray",
-      DEFAULT_GRID_SIZE: 10
+      DEFAULT_BACK_COLOR: "lightgray"
     };
 
     let drawGlobals = {
@@ -60,7 +59,7 @@
       
       clearCanvas: (e) => {
         drawGlobals.ctx.clearRect(0, 0, drawGlobals.ctx.canvas.width, drawGlobals.ctx.canvas.height);
-		drawGrid(drawGlobals.ctx, DRAW_CONSTS.DEFAULT_GRID_COLOR, DRAW_CONSTS.DEFAULT_GRID_SIZE);
+        fillBackground();
       },
     };
 
@@ -125,34 +124,13 @@
       socket.emit('updateServerNum', data);
     }
     
-    let drawGrid = (ctx, color, gridSize) => {
-      // save the current drawing state as it existed before this function was called
-      ctx.save()
+    let fillBackground = () => {
+        drawGlobals.ctx.save();
       
-      // set some drawing state variables
-      ctx.strokeStyle = color;
-      ctx.fillStyle = '#ffffff';
-      ctx.lineWidth = 0.5;
-      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        drawGlobals.ctx.fillStyle = DRAW_CONSTS.DEFAULT_BACK_COLOR;
+        drawGlobals.ctx.fillRect(0, 0, drawGlobals.ctx.canvas.width, drawGlobals.ctx.canvas.height);
       
-      // vertical lines
-      for (let x = gridSize + 0.5; x < ctx.canvas.width; x += gridSize) {
-      	ctx.beginPath();
-      	ctx.moveTo(x, 0);
-      	ctx.lineTo(x, ctx.canvas.height);
-      	ctx.stroke();
-      }
-      
-      // TODO: horizontal lines
-      for (let y = gridSize + 0.5; y < ctx.canvas.height; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(ctx.canvas.width, y);
-        ctx.stroke();
-      }
-      
-      // restore the drawing state
-      ctx.restore();
+        drawGlobals.ctx.restore();
 	};
     
     const init = () => {
@@ -176,7 +154,7 @@
       drawGlobals.ctx.lineCap = DRAW_CONSTS.DEFAULT_LINE_CAP;
       drawGlobals.ctx.lineJoin = DRAW_CONSTS.DEFAULT_LINE_JOIN;
       
-      drawGrid(drawGlobals.ctx, DRAW_CONSTS.DEFAULT_GRID_COLOR, DRAW_CONSTS.DEFAULT_GRID_SIZE, DRAW_CONSTS.DEFAULT_GRID_SIZE);
+      fillBackground();
       
       // Mouse event listeners
       drawGlobals.canvas.onmousedown = mouse.mouseDown;
