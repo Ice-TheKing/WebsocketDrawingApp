@@ -48,6 +48,13 @@ const onUpdateNum = (sock) => {
     // this emits to all sockets, including the current client
     io.sockets.emit('updateNum', { num: globalNum });
   });
+  
+  socket.on('pathToServer', (data) => {
+    console.dir('path to server');
+    console.dir(data);
+    
+    socket.broadcast.to(ENUMS.connections).emit('pathToClient', data);
+  });
 };
 
 io.sockets.on('connection', (socket) => {

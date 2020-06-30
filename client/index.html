@@ -48,6 +48,8 @@
       dragging: false,
       lineWidth: null,
       strokeStyle: null,
+      strokeStart: {},
+      previousMouseLocation: null,
       
       changeLineWidth: (e) => {
         drawGlobals.lineWidth = e.target.value;
@@ -73,8 +75,11 @@
       mouseDown : (e) => {
         drawGlobals.dragging = true;
         let mouseLocation = mouse.getMouse(e);
-        drawGlobals.ctx.beginPath();
+        // drawGlobals.ctx.beginPath();
         drawGlobals.ctx.moveTo(mouseLocation.x, mouseLocation.y);
+        // update the initial stroke location to give to the server
+        drawGlobals.strokeStart.x = mouseLocation.x;
+        drawGlobals.strokeStart.y = mouseLocation.y;
       },
       mouseMove : (e) => {
         if (!drawGlobals.dragging) return;
@@ -84,13 +89,20 @@
         // it'll draw a nasty looking line all the way across canvas
         
         let mouseLocation = mouse.getMouse(e);
+        drawGlobals.ctx.beginPath();
+        drawGlobals.ctx.moveTo(drawGlobals.strokeStart.x, drawGlobals.strokeStart.y);
         drawGlobals.ctx.strokeStyle = drawGlobals.strokeStyle;
         drawGlobals.ctx.lineWidth = drawGlobals.lineWidth;
         drawGlobals.ctx.lineTo(mouseLocation.x, mouseLocation.y);
         drawGlobals.ctx.stroke();
         
+        sendPathToServer(mouseLocation);
+        
         // TODO: save mouse x and y as previous mouse location, so if home girl draws something
         // while you're drawing, your canvas won't freak out and draw a line across the screen.
+        // drawGlobals.strokeStart = { mouseLocation };
+        drawGlobals.strokeStart.x = mouseLocation.x;
+        drawGlobals.strokeStart.y = mouseLocation.y;
       },
       mouseUp: (e) => {
         drawGlobals.dragging = false;
@@ -109,10 +121,12 @@
         document.querySelector("#num").innerHTML = updatedNum;
       });
       
+      socket.on('pathToClient', drawPathFromServer);
+      
       socket.on('clearNum', (data) => {
          document.querySelector("#num").innerHTML = "";
       });
-    }
+    };
     
     const sendNumToServer = () => {
       let newNum = document.querySelector("#newNum").value;
@@ -122,15 +136,42 @@
       };
       
       socket.emit('updateServerNum', data);
-    }
+    };
+    
+    const sendPathToServer = (mouseLocation) => {
+      console.log('sending to server');
+      let path = {
+        start: drawGlobals.strokeStart,
+        end: mouseLocation,
+        style: drawGlobals.strokeStyle,
+        width: drawGlobals.lineWidth
+      };
+      
+      socket.emit('pathToServer', path);
+    };
+    
+    const drawPathFromServer = (data) => {
+      drawGlobals.ctx.save();
+      
+      console.dir(data);
+      
+      drawGlobals.ctx.beginPath();
+      drawGlobals.ctx.strokeStyle = data.style;
+      drawGlobals.ctx.lineWidth = data.width;
+      drawGlobals.ctx.moveTo(data.start.x, data.start.y);
+      drawGlobals.ctx.lineTo(data.end.x, data.end.y);
+      drawGlobals.ctx.stroke();
+      
+      drawGlobals.ctx.restore();
+    };
     
     let fillBackground = () => {
-        drawGlobals.ctx.save();
+      drawGlobals.ctx.save();
       
-        drawGlobals.ctx.fillStyle = DRAW_CONSTS.DEFAULT_BACK_COLOR;
-        drawGlobals.ctx.fillRect(0, 0, drawGlobals.ctx.canvas.width, drawGlobals.ctx.canvas.height);
+      drawGlobals.ctx.fillStyle = DRAW_CONSTS.DEFAULT_BACK_COLOR;
+      drawGlobals.ctx.fillRect(0, 0, drawGlobals.ctx.canvas.width, drawGlobals.ctx.canvas.height);
       
-        drawGlobals.ctx.restore();
+      drawGlobals.ctx.restore();
 	};
     
     const init = () => {
@@ -153,6 +194,8 @@
       drawGlobals.ctx.strokeStyle = drawGlobals.strokeStyle;
       drawGlobals.ctx.lineCap = DRAW_CONSTS.DEFAULT_LINE_CAP;
       drawGlobals.ctx.lineJoin = DRAW_CONSTS.DEFAULT_LINE_JOIN;
+      
+      drawGlobals.ctx.canvas.style.touchAction = "none";
       
       fillBackground();
       
