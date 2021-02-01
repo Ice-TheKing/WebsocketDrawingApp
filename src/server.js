@@ -49,10 +49,7 @@ const onUpdateNum = (sock) => {
     io.sockets.emit('updateNum', { num: globalNum });
   });
   
-  socket.on('pathToServer', (data) => {
-    console.dir('path to server');
-    console.dir(data);
-    
+  socket.on('pathToServer', (data) => {    
     socket.broadcast.to(ENUMS.connections).emit('pathToClient', data);
   });
 };

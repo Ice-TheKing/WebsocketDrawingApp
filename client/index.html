@@ -153,8 +153,6 @@
     const drawPathFromServer = (data) => {
       drawGlobals.ctx.save();
       
-      console.dir(data);
-      
       drawGlobals.ctx.beginPath();
       drawGlobals.ctx.strokeStyle = data.style;
       drawGlobals.ctx.lineWidth = data.width;
