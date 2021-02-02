@@ -114,17 +114,29 @@
     
     const setupSocket = () => {
       socket.on('updateNum', (data) => {
-        console.dir('updating num...');
-        console.dir(data);
-        
-        const updatedNum = data.num;
-        document.querySelector("#num").innerHTML = updatedNum;
+        // console.dir('updating num...');
+        // console.dir(data);
+        // 
+        // const updatedNum = data.num;
+        // document.querySelector("#num").innerHTML = updatedNum;
       });
       
       socket.on('pathToClient', drawPathFromServer);
       
       socket.on('clearNum', (data) => {
          document.querySelector("#num").innerHTML = "";
+      });
+      
+      socket.on('join', (data) => {
+        console.dir('in join event');
+      });
+      
+      socket.on('initDrawing', (data) => {
+        const drawingSteps = data.drawSteps;
+        // TODO: Lock page/input while initializing drawing
+        for(let i = 0; i < drawingSteps.length; i++) {
+          drawPathFromServer(drawingSteps[i]);
+        }
       });
     };
     
@@ -139,7 +151,6 @@
     };
     
     const sendPathToServer = (mouseLocation) => {
-      console.log('sending to server');
       let path = {
         start: drawGlobals.strokeStart,
         end: mouseLocation,

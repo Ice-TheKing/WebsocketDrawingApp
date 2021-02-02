@@ -24,15 +24,15 @@ console.log(`Listening on port ${port}`);
 const io = socketio(app);
 
 let globalNum = 0;
+let globalDrawing = [];
 
 const onConnect = (sock) => {
   const socket = sock;
 
+  socket.emit('updateNum', { num: globalNum });
+  socket.emit('initDrawing', { drawSteps: globalDrawing });
+  
   socket.join(ENUMS.connections);
-
-  socket.on('join', (data) => {
-    socket.emit('updateNum', { num: globalNum });
-  });
 };
 
 const onUpdateNum = (sock) => {
@@ -49,7 +49,8 @@ const onUpdateNum = (sock) => {
     io.sockets.emit('updateNum', { num: globalNum });
   });
   
-  socket.on('pathToServer', (data) => {    
+  socket.on('pathToServer', (data) => {
+    globalDrawing.push(data);
     socket.broadcast.to(ENUMS.connections).emit('pathToClient', data);
   });
 };
