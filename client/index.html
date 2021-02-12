@@ -50,6 +50,7 @@
       strokeStyle: null,
       strokeStart: {},
       previousMouseLocation: null,
+      lockInput: false,
       
       changeLineWidth: (e) => {
         drawGlobals.lineWidth = e.target.value;
@@ -73,6 +74,8 @@
 		return mouseLocation;
       },
       mouseDown : (e) => {
+        if (drawGlobals.lockInput) return;
+        
         drawGlobals.dragging = true;
         let mouseLocation = mouse.getMouse(e);
         // drawGlobals.ctx.beginPath();
@@ -82,7 +85,7 @@
         drawGlobals.strokeStart.y = mouseLocation.y;
       },
       mouseMove : (e) => {
-        if (!drawGlobals.dragging) return;
+        if (!drawGlobals.dragging || drawGlobals.lockInput) return;
         
         // TODO: check if the server just updated the canvas. If they did, you'll have to set moveTo to the previous mouse location
         // otherwise if home boy draws something on the other side of the screen while you're drawing,
@@ -114,11 +117,8 @@
     
     const setupSocket = () => {
       socket.on('updateNum', (data) => {
-        // console.dir('updating num...');
-        // console.dir(data);
-        // 
-        // const updatedNum = data.num;
-        // document.querySelector("#num").innerHTML = updatedNum;
+        const updatedNum = data.num;
+        document.querySelector("#num").innerHTML = updatedNum;
       });
       
       socket.on('pathToClient', drawPathFromServer);
@@ -127,16 +127,14 @@
          document.querySelector("#num").innerHTML = "";
       });
       
-      socket.on('join', (data) => {
-        console.dir('in join event');
-      });
-      
       socket.on('initDrawing', (data) => {
         const drawingSteps = data.drawSteps;
-        // TODO: Lock page/input while initializing drawing
+        // Lock page/input while initializing drawing
+        drawGlobals.lockInput = true;
         for(let i = 0; i < drawingSteps.length; i++) {
           drawPathFromServer(drawingSteps[i]);
         }
+        drawGlobals.lockInput = false;
       });
     };
     
