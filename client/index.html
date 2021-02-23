@@ -7,16 +7,6 @@
 
     "use strict";
 
-    /*
-    So I was tempted to redraw the canvas every single frame, right? But that's ridiculous. Let's say the active users have millions of strokes...
-    no client should have to redraw a million strokes every frame. So instead, what if every time someone makes a stroke,
-    it sends that stroke to the server, the server adds it to a draw queue, then sends only that newest update/stroke to all the current active
-    clients.
-    So then whenever a NEW client connects, the server sends the full draw queue, the new client fills out the canvas with everything drawn so far
-    (it will be in order since it's all saved in a queue), then it won't need to recieve that full queue anymore, and can just get live updates
-    from other clients from then on.    
-    */
-
     // Getting tablet pen pressure: 
     // https://stackoverflow.com/questions/10507341/can-i-recognise-graphic-tablet-pen-pressure-in-javascript
     // http://www.wacomeng.com/web/index.html
@@ -27,9 +17,8 @@
     // undo/redo library:
     // https://codepen.io/abidibo/pen/rmGBc
 
-    // color picker info:
-    // https://www.w3schools.com/colors/colors_picker.asp
-    // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/color
+    // canvas eye dropper tool:
+    // https://stackoverflow.com/questions/17221802/canvas-eyedropper
 
 
     let socket;
@@ -87,10 +76,6 @@
       mouseMove : (e) => {
         if (!drawGlobals.dragging || drawGlobals.lockInput) return;
         
-        // TODO: check if the server just updated the canvas. If they did, you'll have to set moveTo to the previous mouse location
-        // otherwise if home boy draws something on the other side of the screen while you're drawing,
-        // it'll draw a nasty looking line all the way across canvas
-        
         let mouseLocation = mouse.getMouse(e);
         drawGlobals.ctx.beginPath();
         drawGlobals.ctx.moveTo(drawGlobals.strokeStart.x, drawGlobals.strokeStart.y);
@@ -101,9 +86,6 @@
         
         sendPathToServer(mouseLocation);
         
-        // TODO: save mouse x and y as previous mouse location, so if home girl draws something
-        // while you're drawing, your canvas won't freak out and draw a line across the screen.
-        // drawGlobals.strokeStart = { mouseLocation };
         drawGlobals.strokeStart.x = mouseLocation.x;
         drawGlobals.strokeStart.y = mouseLocation.y;
       },
@@ -129,7 +111,7 @@
       
       socket.on('initDrawing', (data) => {
         const drawingSteps = data.drawSteps;
-        // Lock page/input while initializing drawing
+        
         drawGlobals.lockInput = true;
         for(let i = 0; i < drawingSteps.length; i++) {
           drawPathFromServer(drawingSteps[i]);
