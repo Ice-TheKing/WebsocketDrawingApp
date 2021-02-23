@@ -20,6 +20,9 @@
     // canvas eye dropper tool:
     // https://stackoverflow.com/questions/17221802/canvas-eyedropper
 
+    // Techniques for making brushes:
+    // http://perfectionkills.com/exploring-canvas-drawing-techniques/
+
 
     let socket;
 
@@ -65,8 +68,22 @@
       mouseDown : (e) => {
         if (drawGlobals.lockInput) return;
         
-        drawGlobals.dragging = true;
         let mouseLocation = mouse.getMouse(e);
+        
+        // EYE DROPPER while holding alt
+        if (e.altKey) {
+          let pxData = drawGlobals.ctx.getImageData(mouseLocation.x, mouseLocation.y, 1, 1);
+          drawGlobals.strokeStyle = `rgba(${pxData.data[0]}, ${pxData.data[1]}, ${pxData.data[2]}, ${pxData.data[3]})`;
+          
+          // TODO: This line is redundant. Right now it is only here because the #colorPicker.value can only read a #HHEEXX value, but the drawGlobals.strokeStyle
+          // is a rgba() value. Setting the canvas ctx automatically converts it to a hex, so I'm just using that functionality instead of converting it myself
+          drawGlobals.ctx.strokeStyle = drawGlobals.strokeStyle;
+          
+          document.querySelector('#colorPicker').value = drawGlobals.ctx.strokeStyle;
+          return;
+        }
+        
+        drawGlobals.dragging = true;
         // drawGlobals.ctx.beginPath();
         drawGlobals.ctx.moveTo(mouseLocation.x, mouseLocation.y);
         // update the initial stroke location to give to the server
@@ -95,6 +112,13 @@
       mouseOut: (e) => {
         drawGlobals.dragging = false;
       }
+    };
+
+    const onKeyDown = (key) => {
+      //console.dir(key);
+    };
+    const onKeyUp = (key) => {
+      //console.dir(key);
     };
     
     const setupSocket = () => {
@@ -193,6 +217,10 @@
       drawGlobals.canvas.onmousemove = mouse.mouseMove;
       drawGlobals.canvas.onmouseup = mouse.mouseUp;
       drawGlobals.canvas.onmouseout = mouse.mouseOut;
+      // Keyboard listener
+      document.addEventListener('keydown', onKeyDown);
+      document.addEventListener('keyup', onKeyUp);
+      
       // Other listeners
       document.querySelector('#lineWidthSelector').onchange = drawGlobals.changeLineWidth;
       document.querySelector('#colorPicker').onchange = drawGlobals.changeStrokeColor;
