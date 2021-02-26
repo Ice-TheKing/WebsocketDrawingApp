@@ -114,11 +114,17 @@
       }
     };
 
-    const onKeyDown = (key) => {
-      //console.dir(key);
+    const onKeyDown = (e) => {
+      if (e.key === 'Alt') {
+        e.preventDefault();
+        document.body.style.cursor = "crosshair";
+      }
     };
-    const onKeyUp = (key) => {
-      //console.dir(key);
+    const onKeyUp = (e) => {
+      if (e.key === 'Alt') {
+        e.preventDefault();
+        document.body.style.cursor = "auto";
+      }
     };
     
     const setupSocket = () => {
