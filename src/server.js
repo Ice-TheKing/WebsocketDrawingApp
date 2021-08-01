@@ -35,19 +35,8 @@ const onConnect = (sock) => {
   socket.join(ENUMS.connections);
 };
 
-const onUpdateNum = (sock) => {
+const onUpdate = (sock) => {
   const socket = sock;
-
-  socket.on('updateServerNum', (data) => {
-    console.dir(data);
-    globalNum = data.newNum;
-    
-    // socket references the current client emitting, so this will change all but the client sending the info
-    // socket.broadcast.to(ENUMS.connections).emit('updateNum', { num: globalNum });
-    
-    // this emits to all sockets, including the current client
-    io.sockets.emit('updateNum', { num: globalNum });
-  });
   
   socket.on('pathToServer', (data) => {
     globalDrawing.push(data);
@@ -59,6 +48,6 @@ io.sockets.on('connection', (socket) => {
   console.log('started');
 
   onConnect(socket);
-  onUpdateNum(socket);
+  onUpdate(socket);
 });
 

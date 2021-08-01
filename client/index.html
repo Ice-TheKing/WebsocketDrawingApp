@@ -127,17 +127,8 @@
       }
     };
     
-    const setupSocket = () => {
-      socket.on('updateNum', (data) => {
-        const updatedNum = data.num;
-        document.querySelector("#num").innerHTML = updatedNum;
-      });
-      
+    const setupSocket = () => {      
       socket.on('pathToClient', drawPathFromServer);
-      
-      socket.on('clearNum', (data) => {
-         document.querySelector("#num").innerHTML = "";
-      });
       
       socket.on('initDrawing', (data) => {
         const drawingSteps = data.drawSteps;
@@ -148,16 +139,6 @@
         }
         drawGlobals.lockInput = false;
       });
-    };
-    
-    const sendNumToServer = () => {
-      let newNum = document.querySelector("#newNum").value;
-      
-      let data = {
-        newNum
-      };
-      
-      socket.emit('updateServerNum', data);
     };
     
     const sendPathToServer = (mouseLocation) => {
@@ -199,9 +180,6 @@
       
       setupSocket();
       
-      const sendNumBtn = document.querySelector("#send");
-      sendNumBtn.addEventListener('click', sendNumToServer);
-      
       /* INIT CANVAS/DRAW APP */
       // Init Canvas
       drawGlobals.canvas = document.querySelector('#mainCanvas');
@@ -238,10 +216,6 @@
 </head>
   
 <body>
-  <label for="newNum">New Number:</label>
-  <input id="newNum" name="newNum" type="text"/>
-  <input id="send" type="button" value="send" />
-  <p id="num">0</p>
   <canvas id="mainCanvas" width="700" height="500">
     Use a browser compatible with Canvas (probably, just update your browser)
   </canvas>
