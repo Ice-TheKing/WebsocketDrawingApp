@@ -23,13 +23,11 @@ console.log(`Listening on port ${port}`);
 // pass in the http server into socketio and grab the websocket server as io
 const io = socketio(app);
 
-let globalNum = 0;
 let globalDrawing = [];
 
 const onConnect = (sock) => {
   const socket = sock;
 
-  socket.emit('updateNum', { num: globalNum });
   socket.emit('initDrawing', { drawSteps: globalDrawing });
   
   socket.join(ENUMS.connections);
@@ -41,6 +39,11 @@ const onUpdate = (sock) => {
   socket.on('pathToServer', (data) => {
     globalDrawing.push(data);
     socket.broadcast.to(ENUMS.connections).emit('pathToClient', data);
+  });
+  
+  socket.on('clearDrawing', () => {
+    globalDrawing = [];
+    io.to(ENUMS.connections).emit('clearDrawing', { });
   });
 };
 

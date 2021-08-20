@@ -52,7 +52,11 @@
         drawGlobals.strokeStyle = e.target.value;
       },
       
-      clearCanvas: (e) => {
+      clearServerDrawing: (e) => {
+        socket.emit('clearDrawing');
+      },
+      
+      clearLocalCanvas: (e) => {
         drawGlobals.ctx.clearRect(0, 0, drawGlobals.ctx.canvas.width, drawGlobals.ctx.canvas.height);
         fillBackground();
       },
@@ -139,6 +143,10 @@
         }
         drawGlobals.lockInput = false;
       });
+      
+      socket.on('clearDrawing', (data) => {
+        drawGlobals.clearLocalCanvas();
+      });
     };
     
     const sendPathToServer = (mouseLocation) => {
@@ -208,7 +216,7 @@
       // Other listeners
       document.querySelector('#lineWidthSelector').onchange = drawGlobals.changeLineWidth;
       document.querySelector('#colorPicker').onchange = drawGlobals.changeStrokeColor;
-      document.querySelector('#clearButton').addEventListener('click', drawGlobals.clearCanvas);
+      document.querySelector('#clearButton').addEventListener('click', drawGlobals.clearServerDrawing);
     }
     
     window.onload = init;
