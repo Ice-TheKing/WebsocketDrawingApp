@@ -1,4 +1,6 @@
+const express = require('express');
 const http = require('http');
+const path = require('path');
 const fs = require('fs');
 const socketio = require('socket.io');
 
@@ -12,16 +14,27 @@ const onRequest = (request, response) => {
   response.end();
 };
 
-const app = http.createServer(onRequest).listen(port);
+const app = express();
+
+app.get('/', (req, res) => {
+  res.sendFile(path.resolve(`${__dirname}/../client/index.html`));
+});
+
+const server = http.createServer(app);
 
 const ENUMS = {
   connections: 'connections',
 };
 
-console.log(`Listening on port ${port}`);
-
 // pass in the http server into socketio and grab the websocket server as io
-const io = socketio(app);
+const io = socketio(server);
+
+server.listen(port, (err) => {
+  if (err) {
+    throw err;
+  }
+  console.log(`Listening on port ${port}`);
+})
 
 let globalDrawing = [];
 
@@ -43,7 +56,7 @@ const onUpdate = (sock) => {
   
   socket.on('clearDrawing', () => {
     globalDrawing = [];
-    io.to(ENUMS.connections).emit('clearDrawing', { });
+    io.to(ENUMS.connections).emit('clearDrawing');
   });
 };
 
