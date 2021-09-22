@@ -1,12 +1,10 @@
 const express = require('express');
 const http = require('http');
 const path = require('path');
-const fs = require('fs');
 const socketio = require('socket.io');
+const router = require('./router.js');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
-
-const index = fs.readFileSync(`${__dirname}/../client/index.html`);
 
 const onRequest = (request, response) => {
   response.writeHead(200, { 'Content-Type': 'text/html' });
@@ -16,9 +14,11 @@ const onRequest = (request, response) => {
 
 const app = express();
 
-app.get('/', (req, res) => {
+router(app, path);
+
+/*app.get('/', (req, res) => {
   res.sendFile(path.resolve(`${__dirname}/../client/index.html`));
-});
+});*/
 
 const server = http.createServer(app);
 
