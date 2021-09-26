@@ -16,7 +16,6 @@
 // Techniques for making brushes:
 // http://perfectionkills.com/exploring-canvas-drawing-techniques/
 
-
 let socket;
 
 const DRAW_CONSTS = {

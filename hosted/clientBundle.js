@@ -9,6 +9,7 @@
 // https://stackoverflow.com/questions/17221802/canvas-eyedropper
 // Techniques for making brushes:
 // http://perfectionkills.com/exploring-canvas-drawing-techniques/
+// console.dir('ha');
 
 let socket;
 const DRAW_CONSTS = {
