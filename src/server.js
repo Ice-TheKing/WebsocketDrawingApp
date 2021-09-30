@@ -15,6 +15,9 @@ const onRequest = (request, response) => {
 
 const app = express();
 
+app.use('/bootstrap', express.static(path.resolve(`${__dirname}/../node_modules/bootstrap/dist/`)));
+app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted/`)));
+
 app.engine('handlebars', expressHandlebars());
 app.set('view engine', 'handlebars');
 

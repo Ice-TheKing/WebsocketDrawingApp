@@ -1,5 +1,5 @@
 {
-  "name": "canvas-syncing-assignment-part1-master",
+  "name": "real-time-drawing-app",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -15,6 +15,7 @@
   "author": "Mychael B Hunt",
   "license": "ISC",
   "dependencies": {
+    "bootstrap": "^5.1.1",
     "express": "^4.17.1",
     "express-handlebars": "^5.3.4",
     "socket.io": "^2.4.1"
