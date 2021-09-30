@@ -1,4 +1,5 @@
 const express = require('express');
+const expressHandlebars = require('express-handlebars');
 const http = require('http');
 const path = require('path');
 const socketio = require('socket.io');
@@ -13,6 +14,9 @@ const onRequest = (request, response) => {
 };
 
 const app = express();
+
+app.engine('handlebars', expressHandlebars());
+app.set('view engine', 'handlebars');
 
 router(app, path);
 
