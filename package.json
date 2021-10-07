@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "babel ./client --out-file ./hosted/clientBundle.js",
-    "watch": "babel --watch ./client --out-file ./hosted/clientBundle.js",
+    "build": "babel ./client --presets @babel/preset-react --out-file ./hosted/clientBundle.js",
+    "watch": "babel --watch ./client --presets @babel/preset-react --out-file ./hosted/clientBundle.js",
     "nodemon": "nodemon -e js,css,html --watch ./src --watch ./hosted ./src/server.js",
     "dev": "concurrently \"npm run watch\" \"npm run nodemon\"",
     "start": "node ./src/server.js",
@@ -23,6 +23,7 @@
   "devDependencies": {
     "@babel/cli": "^7.15.7",
     "@babel/core": "^7.15.5",
+    "@babel/preset-env": "^7.15.8",
     "@babel/preset-react": "^7.14.5",
     "concurrently": "^6.2.1",
     "eslint": "^3.0.0",

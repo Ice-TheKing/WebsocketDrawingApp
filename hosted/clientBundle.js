@@ -10,15 +10,15 @@
 // Techniques for making brushes:
 // http://perfectionkills.com/exploring-canvas-drawing-techniques/
 
-let socket;
-const DRAW_CONSTS = {
+var socket;
+var DRAW_CONSTS = {
   DEFAULT_LINE_WIDTH: 3,
   DEFAULT_STROKE_STYLE: "#ff0000",
   DEFAULT_LINE_CAP: "round",
   DEFAULT_LINE_JOIN: "round",
   DEFAULT_BACK_COLOR: "lightgray"
 };
-let drawGlobals = {
+var drawGlobals = {
   canvas: null,
   ctx: null,
   dragging: false,
@@ -27,34 +27,34 @@ let drawGlobals = {
   strokeStart: {},
   previousMouseLocation: null,
   lockInput: false,
-  changeLineWidth: e => {
+  changeLineWidth: function changeLineWidth(e) {
     drawGlobals.lineWidth = e.target.value;
   },
-  changeStrokeColor: e => {
+  changeStrokeColor: function changeStrokeColor(e) {
     drawGlobals.strokeStyle = e.target.value;
   },
-  clearServerDrawing: e => {
+  clearServerDrawing: function clearServerDrawing(e) {
     socket.emit('clearDrawing');
   },
-  clearLocalCanvas: e => {
+  clearLocalCanvas: function clearLocalCanvas(e) {
     drawGlobals.ctx.clearRect(0, 0, drawGlobals.ctx.canvas.width, drawGlobals.ctx.canvas.height);
     fillBackground();
   }
 };
-let mouse = {
-  getMouse: e => {
-    let mouseLocation = {};
+var mouse = {
+  getMouse: function getMouse(e) {
+    var mouseLocation = {};
     mouseLocation.x = e.pageX - e.target.offsetLeft;
     mouseLocation.y = e.pageY - e.target.offsetTop;
     return mouseLocation;
   },
-  mouseDown: e => {
+  mouseDown: function mouseDown(e) {
     if (drawGlobals.lockInput) return;
-    let mouseLocation = mouse.getMouse(e); // EYE DROPPER while holding alt
+    var mouseLocation = mouse.getMouse(e); // EYE DROPPER while holding alt
 
     if (e.altKey) {
-      let pxData = drawGlobals.ctx.getImageData(mouseLocation.x, mouseLocation.y, 1, 1);
-      drawGlobals.strokeStyle = `rgba(${pxData.data[0]}, ${pxData.data[1]}, ${pxData.data[2]}, ${pxData.data[3]})`; // TODO: This line is redundant. Right now it is only here because the #colorPicker.value can only read a #HHEEXX value, but the drawGlobals.strokeStyle
+      var pxData = drawGlobals.ctx.getImageData(mouseLocation.x, mouseLocation.y, 1, 1);
+      drawGlobals.strokeStyle = "rgba(".concat(pxData.data[0], ", ").concat(pxData.data[1], ", ").concat(pxData.data[2], ", ").concat(pxData.data[3], ")"); // TODO: This line is redundant. Right now it is only here because the #colorPicker.value can only read a #HHEEXX value, but the drawGlobals.strokeStyle
       // is a rgba() value. Setting the canvas ctx automatically converts it to a hex, so I'm just using that functionality instead of converting it myself
 
       drawGlobals.ctx.strokeStyle = drawGlobals.strokeStyle;
@@ -69,9 +69,9 @@ let mouse = {
     drawGlobals.strokeStart.x = mouseLocation.x;
     drawGlobals.strokeStart.y = mouseLocation.y;
   },
-  mouseMove: e => {
+  mouseMove: function mouseMove(e) {
     if (!drawGlobals.dragging || drawGlobals.lockInput) return;
-    let mouseLocation = mouse.getMouse(e);
+    var mouseLocation = mouse.getMouse(e);
     drawGlobals.ctx.beginPath();
     drawGlobals.ctx.moveTo(drawGlobals.strokeStart.x, drawGlobals.strokeStart.y);
     drawGlobals.ctx.strokeStyle = drawGlobals.strokeStyle;
@@ -82,47 +82,47 @@ let mouse = {
     drawGlobals.strokeStart.x = mouseLocation.x;
     drawGlobals.strokeStart.y = mouseLocation.y;
   },
-  mouseUp: e => {
+  mouseUp: function mouseUp(e) {
     drawGlobals.dragging = false;
   },
-  mouseOut: e => {
+  mouseOut: function mouseOut(e) {
     drawGlobals.dragging = false;
   }
 };
 
-const onKeyDown = e => {
+var onKeyDown = function onKeyDown(e) {
   if (e.key === 'Alt') {
     e.preventDefault();
     document.body.style.cursor = "crosshair";
   }
 };
 
-const onKeyUp = e => {
+var onKeyUp = function onKeyUp(e) {
   if (e.key === 'Alt') {
     e.preventDefault();
     document.body.style.cursor = "auto";
   }
 };
 
-const setupSocket = () => {
+var setupSocket = function setupSocket() {
   socket.on('pathToClient', drawPathFromServer);
-  socket.on('initDrawing', data => {
-    const drawingSteps = data.drawSteps;
+  socket.on('initDrawing', function (data) {
+    var drawingSteps = data.drawSteps;
     drawGlobals.lockInput = true;
 
-    for (let i = 0; i < drawingSteps.length; i++) {
+    for (var i = 0; i < drawingSteps.length; i++) {
       drawPathFromServer(drawingSteps[i]);
     }
 
     drawGlobals.lockInput = false;
   });
-  socket.on('clearDrawing', data => {
+  socket.on('clearDrawing', function (data) {
     drawGlobals.clearLocalCanvas();
   });
 };
 
-const sendPathToServer = mouseLocation => {
-  let path = {
+var sendPathToServer = function sendPathToServer(mouseLocation) {
+  var path = {
     start: drawGlobals.strokeStart,
     end: mouseLocation,
     style: drawGlobals.strokeStyle,
@@ -131,7 +131,7 @@ const sendPathToServer = mouseLocation => {
   socket.emit('pathToServer', path);
 };
 
-const drawPathFromServer = data => {
+var drawPathFromServer = function drawPathFromServer(data) {
   drawGlobals.ctx.save();
   drawGlobals.ctx.beginPath();
   drawGlobals.ctx.strokeStyle = data.style;
@@ -142,14 +142,14 @@ const drawPathFromServer = data => {
   drawGlobals.ctx.restore();
 };
 
-let fillBackground = () => {
+var fillBackground = function fillBackground() {
   drawGlobals.ctx.save();
   drawGlobals.ctx.fillStyle = DRAW_CONSTS.DEFAULT_BACK_COLOR;
   drawGlobals.ctx.fillRect(0, 0, drawGlobals.ctx.canvas.width, drawGlobals.ctx.canvas.height);
   drawGlobals.ctx.restore();
 };
 
-const init = () => {
+var init = function init() {
   /* INIT SOCKET */
   socket = io.connect();
   setupSocket();
@@ -181,3 +181,51 @@ const init = () => {
 };
 
 window.onload = init;
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var HelloMessage = /*#__PURE__*/function (_React$Component) {
+  _inherits(HelloMessage, _React$Component);
+
+  var _super = _createSuper(HelloMessage);
+
+  function HelloMessage() {
+    _classCallCheck(this, HelloMessage);
+
+    return _super.apply(this, arguments);
+  }
+
+  _createClass(HelloMessage, [{
+    key: "render",
+    value: function render() {
+      return /*#__PURE__*/React.createElement("div", null, "Hello ", this.props.name);
+    }
+  }]);
+
+  return HelloMessage;
+}(React.Component);
+
+ReactDOM.render( /*#__PURE__*/React.createElement(HelloMessage, {
+  name: "Taylor"
+}), document.getElementById('hello-example'));
