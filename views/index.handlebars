@@ -3,16 +3,21 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
   <script type="text/babel" src="/assets/clientBundle.js"></script>
+  
+  <!-- React -->
+  <script crossorigin src="/react/react.production.min.js"></script>
+  <script crossorigin src="/reactDOM/react-dom.production.min.js"></script>
+  <script crossorigin src="/modules/prop-types/prop-types.min.js"></script>
 </head>
   
 <body>
   <div class="container">
     <div id="content"></div>
   </div>
-  <canvas id="mainCanvas" width="700" height="500">
+  <!--<canvas id="mainCanvas" width="700" height="500">
     Use a browser compatible with Canvas (probably, just update your browser)
-  </canvas>
-  <div id="controls">
+  </canvas>-->
+  <!--<div id="controls">
     <label>Tool:
       <select id="toolChooser">
         <option value="toolPencil">Pencil</option>
@@ -37,6 +42,6 @@
     </label>
     	
     <span><input id="clearButton" type="button" value="Clear"/></span>
-  </div>
+  </div>-->
 </body>
 </html>

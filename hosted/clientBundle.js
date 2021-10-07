@@ -153,9 +153,11 @@ var init = function init() {
   /* INIT SOCKET */
   socket = io.connect();
   setupSocket();
+};
+
+var initCanvasButtons = function initCanvasButtons() {
   /* INIT CANVAS/DRAW APP */
   // Init Canvas
-
   drawGlobals.canvas = document.querySelector('#mainCanvas');
   drawGlobals.ctx = drawGlobals.canvas.getContext('2d');
   drawGlobals.lineWidth = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
@@ -205,27 +207,108 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-var HelloMessage = /*#__PURE__*/function (_React$Component) {
-  _inherits(HelloMessage, _React$Component);
+var Canvas = /*#__PURE__*/function (_React$Component) {
+  _inherits(Canvas, _React$Component);
 
-  var _super = _createSuper(HelloMessage);
+  var _super = _createSuper(Canvas);
 
-  function HelloMessage() {
-    _classCallCheck(this, HelloMessage);
+  function Canvas() {
+    _classCallCheck(this, Canvas);
 
     return _super.apply(this, arguments);
   }
 
-  _createClass(HelloMessage, [{
+  _createClass(Canvas, [{
     key: "render",
     value: function render() {
-      return /*#__PURE__*/React.createElement("div", null, "Hello ", this.props.name);
+      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("canvas", {
+        id: "mainCanvas",
+        width: 700,
+        height: 500
+      }));
     }
   }]);
 
-  return HelloMessage;
+  return Canvas;
 }(React.Component);
 
-ReactDOM.render( /*#__PURE__*/React.createElement(HelloMessage, {
-  name: "Taylor"
-}), document.getElementById('hello-example'));
+var CanvasButtons = /*#__PURE__*/function (_React$Component2) {
+  _inherits(CanvasButtons, _React$Component2);
+
+  var _super2 = _createSuper(CanvasButtons);
+
+  function CanvasButtons() {
+    _classCallCheck(this, CanvasButtons);
+
+    return _super2.apply(this, arguments);
+  }
+
+  _createClass(CanvasButtons, [{
+    key: "render",
+    value: function render() {
+      return /*#__PURE__*/React.createElement("div", {
+        id: "controls"
+      }, /*#__PURE__*/React.createElement("label", null, "Tool:", /*#__PURE__*/React.createElement("select", {
+        id: "toolChooser"
+      }, /*#__PURE__*/React.createElement("option", {
+        value: "toolPencil"
+      }, "Pencil"))), /*#__PURE__*/React.createElement("label", null, "Line Width:", /*#__PURE__*/React.createElement("select", {
+        id: "lineWidthSelector"
+      }, /*#__PURE__*/React.createElement("option", {
+        value: "1"
+      }, "1"), /*#__PURE__*/React.createElement("option", {
+        value: "2"
+      }, "2"), /*#__PURE__*/React.createElement("option", {
+        value: "3",
+        selected: true
+      }, "3"), /*#__PURE__*/React.createElement("option", {
+        value: "4"
+      }, "4"), /*#__PURE__*/React.createElement("option", {
+        value: "5"
+      }, "5"), /*#__PURE__*/React.createElement("option", {
+        value: "6"
+      }, "6"), /*#__PURE__*/React.createElement("option", {
+        value: "7"
+      }, "7"), /*#__PURE__*/React.createElement("option", {
+        value: "8"
+      }, "8"), /*#__PURE__*/React.createElement("option", {
+        value: "9"
+      }, "9"), /*#__PURE__*/React.createElement("option", {
+        value: "10"
+      }, "10"))), /*#__PURE__*/React.createElement("label", null, "Stroke Color:", /*#__PURE__*/React.createElement("input", {
+        type: "color",
+        value: "#ff0000",
+        id: "colorPicker"
+      })), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("input", {
+        id: "clearButton",
+        type: "button",
+        value: "Clear"
+      })));
+    }
+  }]);
+
+  return CanvasButtons;
+}(React.Component);
+
+var DrawPage = /*#__PURE__*/function (_React$Component3) {
+  _inherits(DrawPage, _React$Component3);
+
+  var _super3 = _createSuper(DrawPage);
+
+  function DrawPage() {
+    _classCallCheck(this, DrawPage);
+
+    return _super3.apply(this, arguments);
+  }
+
+  _createClass(DrawPage, [{
+    key: "render",
+    value: function render() {
+      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Canvas, null));
+    }
+  }]);
+
+  return DrawPage;
+}(React.Component);
+
+ReactDOM.render( /*#__PURE__*/React.createElement(DrawPage, null), document.getElementById('content'), initCanvasButtons);

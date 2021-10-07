@@ -179,7 +179,9 @@ const init = () => {
   socket = io.connect();
   
   setupSocket();
-  
+}
+
+const initCanvasButtons = () => {
   /* INIT CANVAS/DRAW APP */
   // Init Canvas
   drawGlobals.canvas = document.querySelector('#mainCanvas');
