@@ -46,7 +46,7 @@ class DrawPage extends React.Component {
     return (
       <div>
         <Canvas />
-
+        <CanvasButtons />
       </div>
     );
   }
