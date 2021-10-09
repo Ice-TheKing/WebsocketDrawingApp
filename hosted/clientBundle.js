@@ -9,6 +9,9 @@
 // https://stackoverflow.com/questions/17221802/canvas-eyedropper
 // Techniques for making brushes:
 // http://perfectionkills.com/exploring-canvas-drawing-techniques/
+// Mobile touch events:
+// https://mobiforge.com/design-development/html5-mobile-web-touch-events
+// https://www.youtube.com/watch?v=ga_SLzsUdTY
 
 var socket;
 var DRAW_CONSTS = {
@@ -153,11 +156,14 @@ var init = function init() {
   /* INIT SOCKET */
   socket = io.connect();
   setupSocket();
+  initDrawPage();
 };
 
-var initCanvasButtons = function initCanvasButtons() {
+var initDrawPage = function initDrawPage() {
   /* INIT CANVAS/DRAW APP */
-  // Init Canvas
+  // render components in react
+  reactModule.renderDrawPage(); // Init Draw Globals
+
   drawGlobals.canvas = document.querySelector('#mainCanvas');
   drawGlobals.ctx = drawGlobals.canvas.getContext('2d');
   drawGlobals.lineWidth = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
@@ -167,7 +173,14 @@ var initCanvasButtons = function initCanvasButtons() {
   drawGlobals.ctx.lineCap = DRAW_CONSTS.DEFAULT_LINE_CAP;
   drawGlobals.ctx.lineJoin = DRAW_CONSTS.DEFAULT_LINE_JOIN;
   drawGlobals.ctx.canvas.style.touchAction = "none";
-  fillBackground(); // Mouse event listeners
+  fillBackground(); // Init color picker
+  // disable HTML5 color picker
+
+  $('#colorPicker').click(function (e) {
+    e.preventDefault();
+  });
+  $('#colorPicker').colorpicker();
+  $('#colorPicker').on('colorpickerChange', drawGlobals.changeStrokeColor); // Mouse event listeners
 
   drawGlobals.canvas.onmousedown = mouse.mouseDown;
   drawGlobals.canvas.onmousemove = mouse.mouseMove;
@@ -178,7 +191,6 @@ var initCanvasButtons = function initCanvasButtons() {
   document.addEventListener('keyup', onKeyUp); // Other listeners
 
   document.querySelector('#lineWidthSelector').onchange = drawGlobals.changeLineWidth;
-  document.querySelector('#colorPicker').onchange = drawGlobals.changeStrokeColor;
   document.querySelector('#clearButton').addEventListener('click', drawGlobals.clearServerDrawing);
 };
 
@@ -206,6 +218,8 @@ function _assertThisInitialized(self) { if (self === void 0) { throw new Referen
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var reactModule = {};
 
 var Canvas = /*#__PURE__*/function (_React$Component) {
   _inherits(Canvas, _React$Component);
@@ -304,11 +318,15 @@ var DrawPage = /*#__PURE__*/function (_React$Component3) {
   _createClass(DrawPage, [{
     key: "render",
     value: function render() {
-      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Canvas, null));
+      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Canvas, null), /*#__PURE__*/React.createElement(CanvasButtons, null));
     }
   }]);
 
   return DrawPage;
 }(React.Component);
 
-ReactDOM.render( /*#__PURE__*/React.createElement(DrawPage, null), document.getElementById('content'), initCanvasButtons);
+var renderDrawPage = function renderDrawPage(colorPickerOnChange) {
+  ReactDOM.render( /*#__PURE__*/React.createElement(DrawPage, null), document.getElementById('content'));
+};
+
+reactModule.renderDrawPage = renderDrawPage;

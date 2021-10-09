@@ -16,6 +16,10 @@
 // Techniques for making brushes:
 // http://perfectionkills.com/exploring-canvas-drawing-techniques/
 
+// Mobile touch events:
+// https://mobiforge.com/design-development/html5-mobile-web-touch-events
+// https://www.youtube.com/watch?v=ga_SLzsUdTY
+
 let socket;
 
 const DRAW_CONSTS = {
@@ -179,11 +183,15 @@ const init = () => {
   socket = io.connect();
   
   setupSocket();
+  initDrawPage();
 }
 
-const initCanvasButtons = () => {
+const initDrawPage = () => {
   /* INIT CANVAS/DRAW APP */
-  // Init Canvas
+  // render components in react
+  reactModule.renderDrawPage();
+  
+  // Init Draw Globals
   drawGlobals.canvas = document.querySelector('#mainCanvas');
   drawGlobals.ctx = drawGlobals.canvas.getContext('2d');
   drawGlobals.lineWidth = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
@@ -198,6 +206,14 @@ const initCanvasButtons = () => {
   
   fillBackground();
   
+  // Init color picker
+  // disable HTML5 color picker
+  $('#colorPicker').click((e) => {
+    e.preventDefault();
+  });
+  $('#colorPicker').colorpicker();
+  $('#colorPicker').on('colorpickerChange', drawGlobals.changeStrokeColor);
+  
   // Mouse event listeners
   drawGlobals.canvas.onmousedown = mouse.mouseDown;
   drawGlobals.canvas.onmousemove = mouse.mouseMove;
@@ -209,7 +225,6 @@ const initCanvasButtons = () => {
   
   // Other listeners
   document.querySelector('#lineWidthSelector').onchange = drawGlobals.changeLineWidth;
-  document.querySelector('#colorPicker').onchange = drawGlobals.changeStrokeColor;
   document.querySelector('#clearButton').addEventListener('click', drawGlobals.clearServerDrawing);
 }
 

@@ -1,3 +1,5 @@
+const reactModule = {};
+
 class Canvas extends React.Component {
   render() {
     return (
@@ -52,8 +54,11 @@ class DrawPage extends React.Component {
   }
 }
 
-ReactDOM.render(
-  <DrawPage />,
-  document.getElementById('content'),
-  initCanvasButtons
-);
+const renderDrawPage = (colorPickerOnChange) => {
+  ReactDOM.render(
+    <DrawPage />,
+    document.getElementById('content'),
+  );
+};
+
+reactModule.renderDrawPage = renderDrawPage;
