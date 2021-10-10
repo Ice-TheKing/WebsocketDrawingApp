@@ -30,7 +30,7 @@ const DRAW_CONSTS = {
   DEFAULT_BACK_COLOR: "lightgray"
 };
 
-let drawGlobals = {
+let drawController = {
   canvas: null,
   ctx: null,
   dragging: false,
@@ -41,11 +41,11 @@ let drawGlobals = {
   lockInput: false,
   
   changeLineWidth: (e) => {
-    drawGlobals.lineWidth = e.target.value;
+    drawController.lineWidth = e.target.value;
   },
   
   changeStrokeColor: (e) => {
-    drawGlobals.strokeStyle = e.target.value;
+    drawController.strokeStyle = e.target.value;
   },
   
   clearServerDrawing: (e) => {
@@ -53,7 +53,7 @@ let drawGlobals = {
   },
   
   clearLocalCanvas: (e) => {
-    drawGlobals.ctx.clearRect(0, 0, drawGlobals.ctx.canvas.width, drawGlobals.ctx.canvas.height);
+    drawController.ctx.clearRect(0, 0, drawController.ctx.canvas.width, drawController.ctx.canvas.height);
     fillBackground();
   },
 };
@@ -66,51 +66,51 @@ let mouse = {
     return mouseLocation;
   },
   mouseDown : (e) => {
-    if (drawGlobals.lockInput) return;
+    if (drawController.lockInput) return;
     
     let mouseLocation = mouse.getMouse(e);
     
     // EYE DROPPER while holding alt
     if (e.altKey) {
-      let pxData = drawGlobals.ctx.getImageData(mouseLocation.x, mouseLocation.y, 1, 1);
-      drawGlobals.strokeStyle = `rgba(${pxData.data[0]}, ${pxData.data[1]}, ${pxData.data[2]}, ${pxData.data[3]})`;
+      let pxData = drawController.ctx.getImageData(mouseLocation.x, mouseLocation.y, 1, 1);
+      drawController.strokeStyle = `rgba(${pxData.data[0]}, ${pxData.data[1]}, ${pxData.data[2]}, ${pxData.data[3]})`;
       
-      // TODO: This line is redundant. Right now it is only here because the #colorPicker.value can only read a #HHEEXX value, but the drawGlobals.strokeStyle
+      // TODO: This line is redundant. Right now it is only here because the #colorPicker.value can only read a #HHEEXX value, but the drawController.strokeStyle
       // is a rgba() value. Setting the canvas ctx automatically converts it to a hex, so I'm just using that functionality instead of converting it myself
-      drawGlobals.ctx.strokeStyle = drawGlobals.strokeStyle;
+      drawController.ctx.strokeStyle = drawController.strokeStyle;
       
-      document.querySelector('#colorPicker').value = drawGlobals.ctx.strokeStyle;
+      document.querySelector('#colorPicker').value = drawController.ctx.strokeStyle;
       return;
     }
     
-    drawGlobals.dragging = true;
-    // drawGlobals.ctx.beginPath();
-    drawGlobals.ctx.moveTo(mouseLocation.x, mouseLocation.y);
+    drawController.dragging = true;
+    // drawController.ctx.beginPath();
+    drawController.ctx.moveTo(mouseLocation.x, mouseLocation.y);
     // update the initial stroke location to give to the server
-    drawGlobals.strokeStart.x = mouseLocation.x;
-    drawGlobals.strokeStart.y = mouseLocation.y;
+    drawController.strokeStart.x = mouseLocation.x;
+    drawController.strokeStart.y = mouseLocation.y;
   },
   mouseMove : (e) => {
-    if (!drawGlobals.dragging || drawGlobals.lockInput) return;
+    if (!drawController.dragging || drawController.lockInput) return;
     
     let mouseLocation = mouse.getMouse(e);
-    drawGlobals.ctx.beginPath();
-    drawGlobals.ctx.moveTo(drawGlobals.strokeStart.x, drawGlobals.strokeStart.y);
-    drawGlobals.ctx.strokeStyle = drawGlobals.strokeStyle;
-    drawGlobals.ctx.lineWidth = drawGlobals.lineWidth;
-    drawGlobals.ctx.lineTo(mouseLocation.x, mouseLocation.y);
-    drawGlobals.ctx.stroke();
+    drawController.ctx.beginPath();
+    drawController.ctx.moveTo(drawController.strokeStart.x, drawController.strokeStart.y);
+    drawController.ctx.strokeStyle = drawController.strokeStyle;
+    drawController.ctx.lineWidth = drawController.lineWidth;
+    drawController.ctx.lineTo(mouseLocation.x, mouseLocation.y);
+    drawController.ctx.stroke();
     
     sendPathToServer(mouseLocation);
     
-    drawGlobals.strokeStart.x = mouseLocation.x;
-    drawGlobals.strokeStart.y = mouseLocation.y;
+    drawController.strokeStart.x = mouseLocation.x;
+    drawController.strokeStart.y = mouseLocation.y;
   },
   mouseUp: (e) => {
-    drawGlobals.dragging = false;
+    drawController.dragging = false;
   },
   mouseOut: (e) => {
-    drawGlobals.dragging = false;
+    drawController.dragging = false;
   }
 };
 
@@ -133,49 +133,49 @@ const setupSocket = () => {
   socket.on('initDrawing', (data) => {
     const drawingSteps = data.drawSteps;
     
-    drawGlobals.lockInput = true;
+    drawController.lockInput = true;
     for(let i = 0; i < drawingSteps.length; i++) {
       drawPathFromServer(drawingSteps[i]);
     }
-    drawGlobals.lockInput = false;
+    drawController.lockInput = false;
   });
   
   socket.on('clearDrawing', (data) => {
-    drawGlobals.clearLocalCanvas();
+    drawController.clearLocalCanvas();
   });
 };
 
 const sendPathToServer = (mouseLocation) => {
   let path = {
-    start: drawGlobals.strokeStart,
+    start: drawController.strokeStart,
     end: mouseLocation,
-    style: drawGlobals.strokeStyle,
-    width: drawGlobals.lineWidth
+    style: drawController.strokeStyle,
+    width: drawController.lineWidth
   };
   
   socket.emit('pathToServer', path);
 };
 
 const drawPathFromServer = (data) => {
-  drawGlobals.ctx.save();
+  drawController.ctx.save();
   
-  drawGlobals.ctx.beginPath();
-  drawGlobals.ctx.strokeStyle = data.style;
-  drawGlobals.ctx.lineWidth = data.width;
-  drawGlobals.ctx.moveTo(data.start.x, data.start.y);
-  drawGlobals.ctx.lineTo(data.end.x, data.end.y);
-  drawGlobals.ctx.stroke();
+  drawController.ctx.beginPath();
+  drawController.ctx.strokeStyle = data.style;
+  drawController.ctx.lineWidth = data.width;
+  drawController.ctx.moveTo(data.start.x, data.start.y);
+  drawController.ctx.lineTo(data.end.x, data.end.y);
+  drawController.ctx.stroke();
   
-  drawGlobals.ctx.restore();
+  drawController.ctx.restore();
 };
     
 let fillBackground = () => {
-  drawGlobals.ctx.save();
+  drawController.ctx.save();
   
-  drawGlobals.ctx.fillStyle = DRAW_CONSTS.DEFAULT_BACK_COLOR;
-  drawGlobals.ctx.fillRect(0, 0, drawGlobals.ctx.canvas.width, drawGlobals.ctx.canvas.height);
+  drawController.ctx.fillStyle = DRAW_CONSTS.DEFAULT_BACK_COLOR;
+  drawController.ctx.fillRect(0, 0, drawController.ctx.canvas.width, drawController.ctx.canvas.height);
   
-  drawGlobals.ctx.restore();
+  drawController.ctx.restore();
 };
 
 const init = () => {
@@ -192,17 +192,17 @@ const initDrawPage = () => {
   reactModule.renderDrawPage();
   
   // Init Draw Globals
-  drawGlobals.canvas = document.querySelector('#mainCanvas');
-  drawGlobals.ctx = drawGlobals.canvas.getContext('2d');
-  drawGlobals.lineWidth = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
-  drawGlobals.strokeStyle = DRAW_CONSTS.DEFAULT_STROKE_STYLE;
+  drawController.canvas = document.querySelector('#mainCanvas');
+  drawController.ctx = drawController.canvas.getContext('2d');
+  drawController.lineWidth = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
+  drawController.strokeStyle = DRAW_CONSTS.DEFAULT_STROKE_STYLE;
   
-  drawGlobals.ctx.lineWidth = drawGlobals.lineWidth;
-  drawGlobals.ctx.strokeStyle = drawGlobals.strokeStyle;
-  drawGlobals.ctx.lineCap = DRAW_CONSTS.DEFAULT_LINE_CAP;
-  drawGlobals.ctx.lineJoin = DRAW_CONSTS.DEFAULT_LINE_JOIN;
+  drawController.ctx.lineWidth = drawController.lineWidth;
+  drawController.ctx.strokeStyle = drawController.strokeStyle;
+  drawController.ctx.lineCap = DRAW_CONSTS.DEFAULT_LINE_CAP;
+  drawController.ctx.lineJoin = DRAW_CONSTS.DEFAULT_LINE_JOIN;
   
-  drawGlobals.ctx.canvas.style.touchAction = "none";
+  drawController.ctx.canvas.style.touchAction = "none";
   
   fillBackground();
   
@@ -212,20 +212,20 @@ const initDrawPage = () => {
     e.preventDefault();
   });
   $('#colorPicker').colorpicker();
-  $('#colorPicker').on('colorpickerChange', drawGlobals.changeStrokeColor);
+  $('#colorPicker').on('colorpickerChange', drawController.changeStrokeColor);
   
   // Mouse event listeners
-  drawGlobals.canvas.onmousedown = mouse.mouseDown;
-  drawGlobals.canvas.onmousemove = mouse.mouseMove;
-  drawGlobals.canvas.onmouseup = mouse.mouseUp;
-  drawGlobals.canvas.onmouseout = mouse.mouseOut;
+  drawController.canvas.onmousedown = mouse.mouseDown;
+  drawController.canvas.onmousemove = mouse.mouseMove;
+  drawController.canvas.onmouseup = mouse.mouseUp;
+  drawController.canvas.onmouseout = mouse.mouseOut;
   // Keyboard listener
   document.addEventListener('keydown', onKeyDown);
   document.addEventListener('keyup', onKeyUp);
   
   // Other listeners
-  document.querySelector('#lineWidthSelector').onchange = drawGlobals.changeLineWidth;
-  document.querySelector('#clearButton').addEventListener('click', drawGlobals.clearServerDrawing);
+  document.querySelector('#lineWidthSelector').onchange = drawController.changeLineWidth;
+  document.querySelector('#clearButton').addEventListener('click', drawController.clearServerDrawing);
 }
 
 window.onload = init;

@@ -1,17 +1,4 @@
-"use strict"; // Getting tablet pen pressure: 
-// https://stackoverflow.com/questions/10507341/can-i-recognise-graphic-tablet-pen-pressure-in-javascript
-// http://www.wacomeng.com/web/index.html
-// Saving canvas to png:
-// https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL
-// undo/redo library:
-// https://codepen.io/abidibo/pen/rmGBc
-// canvas eye dropper tool:
-// https://stackoverflow.com/questions/17221802/canvas-eyedropper
-// Techniques for making brushes:
-// http://perfectionkills.com/exploring-canvas-drawing-techniques/
-// Mobile touch events:
-// https://mobiforge.com/design-development/html5-mobile-web-touch-events
-// https://www.youtube.com/watch?v=ga_SLzsUdTY
+"use strict";
 
 var socket;
 var DRAW_CONSTS = {
@@ -21,7 +8,7 @@ var DRAW_CONSTS = {
   DEFAULT_LINE_JOIN: "round",
   DEFAULT_BACK_COLOR: "lightgray"
 };
-var drawGlobals = {
+var drawController = {
   canvas: null,
   ctx: null,
   dragging: false,
@@ -31,16 +18,16 @@ var drawGlobals = {
   previousMouseLocation: null,
   lockInput: false,
   changeLineWidth: function changeLineWidth(e) {
-    drawGlobals.lineWidth = e.target.value;
+    drawController.lineWidth = e.target.value;
   },
   changeStrokeColor: function changeStrokeColor(e) {
-    drawGlobals.strokeStyle = e.target.value;
+    drawController.strokeStyle = e.target.value;
   },
   clearServerDrawing: function clearServerDrawing(e) {
     socket.emit('clearDrawing');
   },
   clearLocalCanvas: function clearLocalCanvas(e) {
-    drawGlobals.ctx.clearRect(0, 0, drawGlobals.ctx.canvas.width, drawGlobals.ctx.canvas.height);
+    drawController.ctx.clearRect(0, 0, drawController.ctx.canvas.width, drawController.ctx.canvas.height);
     fillBackground();
   }
 };
@@ -52,44 +39,40 @@ var mouse = {
     return mouseLocation;
   },
   mouseDown: function mouseDown(e) {
-    if (drawGlobals.lockInput) return;
-    var mouseLocation = mouse.getMouse(e); // EYE DROPPER while holding alt
+    if (drawController.lockInput) return;
+    var mouseLocation = mouse.getMouse(e);
 
     if (e.altKey) {
-      var pxData = drawGlobals.ctx.getImageData(mouseLocation.x, mouseLocation.y, 1, 1);
-      drawGlobals.strokeStyle = "rgba(".concat(pxData.data[0], ", ").concat(pxData.data[1], ", ").concat(pxData.data[2], ", ").concat(pxData.data[3], ")"); // TODO: This line is redundant. Right now it is only here because the #colorPicker.value can only read a #HHEEXX value, but the drawGlobals.strokeStyle
-      // is a rgba() value. Setting the canvas ctx automatically converts it to a hex, so I'm just using that functionality instead of converting it myself
-
-      drawGlobals.ctx.strokeStyle = drawGlobals.strokeStyle;
-      document.querySelector('#colorPicker').value = drawGlobals.ctx.strokeStyle;
+      var pxData = drawController.ctx.getImageData(mouseLocation.x, mouseLocation.y, 1, 1);
+      drawController.strokeStyle = "rgba(".concat(pxData.data[0], ", ").concat(pxData.data[1], ", ").concat(pxData.data[2], ", ").concat(pxData.data[3], ")");
+      drawController.ctx.strokeStyle = drawController.strokeStyle;
+      document.querySelector('#colorPicker').value = drawController.ctx.strokeStyle;
       return;
     }
 
-    drawGlobals.dragging = true; // drawGlobals.ctx.beginPath();
-
-    drawGlobals.ctx.moveTo(mouseLocation.x, mouseLocation.y); // update the initial stroke location to give to the server
-
-    drawGlobals.strokeStart.x = mouseLocation.x;
-    drawGlobals.strokeStart.y = mouseLocation.y;
+    drawController.dragging = true;
+    drawController.ctx.moveTo(mouseLocation.x, mouseLocation.y);
+    drawController.strokeStart.x = mouseLocation.x;
+    drawController.strokeStart.y = mouseLocation.y;
   },
   mouseMove: function mouseMove(e) {
-    if (!drawGlobals.dragging || drawGlobals.lockInput) return;
+    if (!drawController.dragging || drawController.lockInput) return;
     var mouseLocation = mouse.getMouse(e);
-    drawGlobals.ctx.beginPath();
-    drawGlobals.ctx.moveTo(drawGlobals.strokeStart.x, drawGlobals.strokeStart.y);
-    drawGlobals.ctx.strokeStyle = drawGlobals.strokeStyle;
-    drawGlobals.ctx.lineWidth = drawGlobals.lineWidth;
-    drawGlobals.ctx.lineTo(mouseLocation.x, mouseLocation.y);
-    drawGlobals.ctx.stroke();
+    drawController.ctx.beginPath();
+    drawController.ctx.moveTo(drawController.strokeStart.x, drawController.strokeStart.y);
+    drawController.ctx.strokeStyle = drawController.strokeStyle;
+    drawController.ctx.lineWidth = drawController.lineWidth;
+    drawController.ctx.lineTo(mouseLocation.x, mouseLocation.y);
+    drawController.ctx.stroke();
     sendPathToServer(mouseLocation);
-    drawGlobals.strokeStart.x = mouseLocation.x;
-    drawGlobals.strokeStart.y = mouseLocation.y;
+    drawController.strokeStart.x = mouseLocation.x;
+    drawController.strokeStart.y = mouseLocation.y;
   },
   mouseUp: function mouseUp(e) {
-    drawGlobals.dragging = false;
+    drawController.dragging = false;
   },
   mouseOut: function mouseOut(e) {
-    drawGlobals.dragging = false;
+    drawController.dragging = false;
   }
 };
 
@@ -111,87 +94,78 @@ var setupSocket = function setupSocket() {
   socket.on('pathToClient', drawPathFromServer);
   socket.on('initDrawing', function (data) {
     var drawingSteps = data.drawSteps;
-    drawGlobals.lockInput = true;
+    drawController.lockInput = true;
 
     for (var i = 0; i < drawingSteps.length; i++) {
       drawPathFromServer(drawingSteps[i]);
     }
 
-    drawGlobals.lockInput = false;
+    drawController.lockInput = false;
   });
   socket.on('clearDrawing', function (data) {
-    drawGlobals.clearLocalCanvas();
+    drawController.clearLocalCanvas();
   });
 };
 
 var sendPathToServer = function sendPathToServer(mouseLocation) {
   var path = {
-    start: drawGlobals.strokeStart,
+    start: drawController.strokeStart,
     end: mouseLocation,
-    style: drawGlobals.strokeStyle,
-    width: drawGlobals.lineWidth
+    style: drawController.strokeStyle,
+    width: drawController.lineWidth
   };
   socket.emit('pathToServer', path);
 };
 
 var drawPathFromServer = function drawPathFromServer(data) {
-  drawGlobals.ctx.save();
-  drawGlobals.ctx.beginPath();
-  drawGlobals.ctx.strokeStyle = data.style;
-  drawGlobals.ctx.lineWidth = data.width;
-  drawGlobals.ctx.moveTo(data.start.x, data.start.y);
-  drawGlobals.ctx.lineTo(data.end.x, data.end.y);
-  drawGlobals.ctx.stroke();
-  drawGlobals.ctx.restore();
+  drawController.ctx.save();
+  drawController.ctx.beginPath();
+  drawController.ctx.strokeStyle = data.style;
+  drawController.ctx.lineWidth = data.width;
+  drawController.ctx.moveTo(data.start.x, data.start.y);
+  drawController.ctx.lineTo(data.end.x, data.end.y);
+  drawController.ctx.stroke();
+  drawController.ctx.restore();
 };
 
 var fillBackground = function fillBackground() {
-  drawGlobals.ctx.save();
-  drawGlobals.ctx.fillStyle = DRAW_CONSTS.DEFAULT_BACK_COLOR;
-  drawGlobals.ctx.fillRect(0, 0, drawGlobals.ctx.canvas.width, drawGlobals.ctx.canvas.height);
-  drawGlobals.ctx.restore();
+  drawController.ctx.save();
+  drawController.ctx.fillStyle = DRAW_CONSTS.DEFAULT_BACK_COLOR;
+  drawController.ctx.fillRect(0, 0, drawController.ctx.canvas.width, drawController.ctx.canvas.height);
+  drawController.ctx.restore();
 };
 
 var init = function init() {
-  /* INIT SOCKET */
   socket = io.connect();
   setupSocket();
   initDrawPage();
 };
 
 var initDrawPage = function initDrawPage() {
-  /* INIT CANVAS/DRAW APP */
-  // render components in react
-  reactModule.renderDrawPage(); // Init Draw Globals
-
-  drawGlobals.canvas = document.querySelector('#mainCanvas');
-  drawGlobals.ctx = drawGlobals.canvas.getContext('2d');
-  drawGlobals.lineWidth = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
-  drawGlobals.strokeStyle = DRAW_CONSTS.DEFAULT_STROKE_STYLE;
-  drawGlobals.ctx.lineWidth = drawGlobals.lineWidth;
-  drawGlobals.ctx.strokeStyle = drawGlobals.strokeStyle;
-  drawGlobals.ctx.lineCap = DRAW_CONSTS.DEFAULT_LINE_CAP;
-  drawGlobals.ctx.lineJoin = DRAW_CONSTS.DEFAULT_LINE_JOIN;
-  drawGlobals.ctx.canvas.style.touchAction = "none";
-  fillBackground(); // Init color picker
-  // disable HTML5 color picker
-
+  reactModule.renderDrawPage();
+  drawController.canvas = document.querySelector('#mainCanvas');
+  drawController.ctx = drawController.canvas.getContext('2d');
+  drawController.lineWidth = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
+  drawController.strokeStyle = DRAW_CONSTS.DEFAULT_STROKE_STYLE;
+  drawController.ctx.lineWidth = drawController.lineWidth;
+  drawController.ctx.strokeStyle = drawController.strokeStyle;
+  drawController.ctx.lineCap = DRAW_CONSTS.DEFAULT_LINE_CAP;
+  drawController.ctx.lineJoin = DRAW_CONSTS.DEFAULT_LINE_JOIN;
+  drawController.ctx.canvas.style.touchAction = "none";
+  fillBackground();
   $('#colorPicker').click(function (e) {
     e.preventDefault();
   });
   $('#colorPicker').colorpicker();
-  $('#colorPicker').on('colorpickerChange', drawGlobals.changeStrokeColor); // Mouse event listeners
-
-  drawGlobals.canvas.onmousedown = mouse.mouseDown;
-  drawGlobals.canvas.onmousemove = mouse.mouseMove;
-  drawGlobals.canvas.onmouseup = mouse.mouseUp;
-  drawGlobals.canvas.onmouseout = mouse.mouseOut; // Keyboard listener
-
+  $('#colorPicker').on('colorpickerChange', drawController.changeStrokeColor);
+  drawController.canvas.onmousedown = mouse.mouseDown;
+  drawController.canvas.onmousemove = mouse.mouseMove;
+  drawController.canvas.onmouseup = mouse.mouseUp;
+  drawController.canvas.onmouseout = mouse.mouseOut;
   document.addEventListener('keydown', onKeyDown);
-  document.addEventListener('keyup', onKeyUp); // Other listeners
-
-  document.querySelector('#lineWidthSelector').onchange = drawGlobals.changeLineWidth;
-  document.querySelector('#clearButton').addEventListener('click', drawGlobals.clearServerDrawing);
+  document.addEventListener('keyup', onKeyUp);
+  document.querySelector('#lineWidthSelector').onchange = drawController.changeLineWidth;
+  document.querySelector('#clearButton').addEventListener('click', drawController.clearServerDrawing);
 };
 
 window.onload = init;
@@ -221,7 +195,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 var reactModule = {};
 
-var Canvas = /*#__PURE__*/function (_React$Component) {
+var Canvas = function (_React$Component) {
   _inherits(Canvas, _React$Component);
 
   var _super = _createSuper(Canvas);
@@ -235,7 +209,7 @@ var Canvas = /*#__PURE__*/function (_React$Component) {
   _createClass(Canvas, [{
     key: "render",
     value: function render() {
-      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("canvas", {
+      return React.createElement("div", null, React.createElement("canvas", {
         id: "mainCanvas",
         width: 700,
         height: 500
@@ -246,7 +220,7 @@ var Canvas = /*#__PURE__*/function (_React$Component) {
   return Canvas;
 }(React.Component);
 
-var CanvasButtons = /*#__PURE__*/function (_React$Component2) {
+var CanvasButtons = function (_React$Component2) {
   _inherits(CanvasButtons, _React$Component2);
 
   var _super2 = _createSuper(CanvasButtons);
@@ -260,40 +234,40 @@ var CanvasButtons = /*#__PURE__*/function (_React$Component2) {
   _createClass(CanvasButtons, [{
     key: "render",
     value: function render() {
-      return /*#__PURE__*/React.createElement("div", {
+      return React.createElement("div", {
         id: "controls"
-      }, /*#__PURE__*/React.createElement("label", null, "Tool:", /*#__PURE__*/React.createElement("select", {
+      }, React.createElement("label", null, "Tool:", React.createElement("select", {
         id: "toolChooser"
-      }, /*#__PURE__*/React.createElement("option", {
+      }, React.createElement("option", {
         value: "toolPencil"
-      }, "Pencil"))), /*#__PURE__*/React.createElement("label", null, "Line Width:", /*#__PURE__*/React.createElement("select", {
+      }, "Pencil"))), React.createElement("label", null, "Line Width:", React.createElement("select", {
         id: "lineWidthSelector"
-      }, /*#__PURE__*/React.createElement("option", {
+      }, React.createElement("option", {
         value: "1"
-      }, "1"), /*#__PURE__*/React.createElement("option", {
+      }, "1"), React.createElement("option", {
         value: "2"
-      }, "2"), /*#__PURE__*/React.createElement("option", {
+      }, "2"), React.createElement("option", {
         value: "3",
         selected: true
-      }, "3"), /*#__PURE__*/React.createElement("option", {
+      }, "3"), React.createElement("option", {
         value: "4"
-      }, "4"), /*#__PURE__*/React.createElement("option", {
+      }, "4"), React.createElement("option", {
         value: "5"
-      }, "5"), /*#__PURE__*/React.createElement("option", {
+      }, "5"), React.createElement("option", {
         value: "6"
-      }, "6"), /*#__PURE__*/React.createElement("option", {
+      }, "6"), React.createElement("option", {
         value: "7"
-      }, "7"), /*#__PURE__*/React.createElement("option", {
+      }, "7"), React.createElement("option", {
         value: "8"
-      }, "8"), /*#__PURE__*/React.createElement("option", {
+      }, "8"), React.createElement("option", {
         value: "9"
-      }, "9"), /*#__PURE__*/React.createElement("option", {
+      }, "9"), React.createElement("option", {
         value: "10"
-      }, "10"))), /*#__PURE__*/React.createElement("label", null, "Stroke Color:", /*#__PURE__*/React.createElement("input", {
+      }, "10"))), React.createElement("label", null, "Stroke Color:", React.createElement("input", {
         type: "color",
         value: "#ff0000",
         id: "colorPicker"
-      })), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("input", {
+      })), React.createElement("span", null, React.createElement("input", {
         id: "clearButton",
         type: "button",
         value: "Clear"
@@ -304,7 +278,7 @@ var CanvasButtons = /*#__PURE__*/function (_React$Component2) {
   return CanvasButtons;
 }(React.Component);
 
-var DrawPage = /*#__PURE__*/function (_React$Component3) {
+var DrawPage = function (_React$Component3) {
   _inherits(DrawPage, _React$Component3);
 
   var _super3 = _createSuper(DrawPage);
@@ -318,7 +292,7 @@ var DrawPage = /*#__PURE__*/function (_React$Component3) {
   _createClass(DrawPage, [{
     key: "render",
     value: function render() {
-      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Canvas, null), /*#__PURE__*/React.createElement(CanvasButtons, null));
+      return React.createElement("div", null, React.createElement(Canvas, null), React.createElement(CanvasButtons, null));
     }
   }]);
 
@@ -326,7 +300,7 @@ var DrawPage = /*#__PURE__*/function (_React$Component3) {
 }(React.Component);
 
 var renderDrawPage = function renderDrawPage(colorPickerOnChange) {
-  ReactDOM.render( /*#__PURE__*/React.createElement(DrawPage, null), document.getElementById('content'));
+  ReactDOM.render(React.createElement(DrawPage, null), document.getElementById('content'));
 };
 
 reactModule.renderDrawPage = renderDrawPage;
