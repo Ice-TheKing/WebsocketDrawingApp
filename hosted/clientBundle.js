@@ -29,6 +29,13 @@ var drawController = {
   clearLocalCanvas: function clearLocalCanvas(e) {
     drawController.ctx.clearRect(0, 0, drawController.ctx.canvas.width, drawController.ctx.canvas.height);
     fillBackground();
+  },
+  setToColorAtLocation: function setToColorAtLocation(location) {
+    console.dir(location);
+    var pxData = drawController.ctx.getImageData(location.x, location.y, 1, 1);
+    drawController.strokeStyle = "rgba(".concat(pxData.data[0], ", ").concat(pxData.data[1], ", ").concat(pxData.data[2], ", ").concat(pxData.data[3], ")");
+    drawController.ctx.strokeStyle = drawController.strokeStyle;
+    document.querySelector('#colorPicker').value = drawController.ctx.strokeStyle;
   }
 };
 var mouse = {
@@ -41,16 +48,13 @@ var mouse = {
   mouseDown: function mouseDown(e) {
     if (drawController.lockInput) return;
     var mouseLocation = mouse.getMouse(e);
+    drawController.dragging = true;
 
     if (e.altKey) {
-      var pxData = drawController.ctx.getImageData(mouseLocation.x, mouseLocation.y, 1, 1);
-      drawController.strokeStyle = "rgba(".concat(pxData.data[0], ", ").concat(pxData.data[1], ", ").concat(pxData.data[2], ", ").concat(pxData.data[3], ")");
-      drawController.ctx.strokeStyle = drawController.strokeStyle;
-      document.querySelector('#colorPicker').value = drawController.ctx.strokeStyle;
+      drawController.setToColorAtLocation(mouseLocation);
       return;
     }
 
-    drawController.dragging = true;
     drawController.ctx.moveTo(mouseLocation.x, mouseLocation.y);
     drawController.strokeStart.x = mouseLocation.x;
     drawController.strokeStart.y = mouseLocation.y;
@@ -58,6 +62,12 @@ var mouse = {
   mouseMove: function mouseMove(e) {
     if (!drawController.dragging || drawController.lockInput) return;
     var mouseLocation = mouse.getMouse(e);
+
+    if (e.altKey) {
+      drawController.setToColorAtLocation(mouseLocation);
+      return;
+    }
+
     drawController.ctx.beginPath();
     drawController.ctx.moveTo(drawController.strokeStart.x, drawController.strokeStart.y);
     drawController.ctx.strokeStyle = drawController.strokeStyle;

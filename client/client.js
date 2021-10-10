@@ -56,6 +56,18 @@ let drawController = {
     drawController.ctx.clearRect(0, 0, drawController.ctx.canvas.width, drawController.ctx.canvas.height);
     fillBackground();
   },
+  
+  setToColorAtLocation: (location) => {
+    console.dir(location);
+    let pxData = drawController.ctx.getImageData(location.x, location.y, 1, 1);
+    drawController.strokeStyle = `rgba(${pxData.data[0]}, ${pxData.data[1]}, ${pxData.data[2]}, ${pxData.data[3]})`;
+    
+    // TODO: This line is redundant. Right now it is only here because the #colorPicker.value can only read a #HHEEXX value, but the drawController.strokeStyle
+    // is a rgba() value. Setting the canvas ctx automatically converts it to a hex, so I'm just using that functionality instead of converting it myself
+    drawController.ctx.strokeStyle = drawController.strokeStyle;
+    
+    document.querySelector('#colorPicker').value = drawController.ctx.strokeStyle;
+  }
 };
 
 let mouse = {
@@ -65,35 +77,37 @@ let mouse = {
     mouseLocation.y = e.pageY - e.target.offsetTop;
     return mouseLocation;
   },
+  
   mouseDown : (e) => {
     if (drawController.lockInput) return;
     
     let mouseLocation = mouse.getMouse(e);
     
+    drawController.dragging = true;
+    
     // EYE DROPPER while holding alt
     if (e.altKey) {
-      let pxData = drawController.ctx.getImageData(mouseLocation.x, mouseLocation.y, 1, 1);
-      drawController.strokeStyle = `rgba(${pxData.data[0]}, ${pxData.data[1]}, ${pxData.data[2]}, ${pxData.data[3]})`;
-      
-      // TODO: This line is redundant. Right now it is only here because the #colorPicker.value can only read a #HHEEXX value, but the drawController.strokeStyle
-      // is a rgba() value. Setting the canvas ctx automatically converts it to a hex, so I'm just using that functionality instead of converting it myself
-      drawController.ctx.strokeStyle = drawController.strokeStyle;
-      
-      document.querySelector('#colorPicker').value = drawController.ctx.strokeStyle;
+      drawController.setToColorAtLocation(mouseLocation);
       return;
     }
     
-    drawController.dragging = true;
     // drawController.ctx.beginPath();
     drawController.ctx.moveTo(mouseLocation.x, mouseLocation.y);
     // update the initial stroke location to give to the server
     drawController.strokeStart.x = mouseLocation.x;
     drawController.strokeStart.y = mouseLocation.y;
   },
+  
   mouseMove : (e) => {
     if (!drawController.dragging || drawController.lockInput) return;
     
     let mouseLocation = mouse.getMouse(e);
+    
+    if (e.altKey) {
+      drawController.setToColorAtLocation(mouseLocation);
+      return;
+    }
+    
     drawController.ctx.beginPath();
     drawController.ctx.moveTo(drawController.strokeStart.x, drawController.strokeStart.y);
     drawController.ctx.strokeStyle = drawController.strokeStyle;
@@ -106,12 +120,15 @@ let mouse = {
     drawController.strokeStart.x = mouseLocation.x;
     drawController.strokeStart.y = mouseLocation.y;
   },
+  
   mouseUp: (e) => {
     drawController.dragging = false;
   },
+  
   mouseOut: (e) => {
     drawController.dragging = false;
   }
+  
 };
 
 const onKeyDown = (e) => {
