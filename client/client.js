@@ -245,4 +245,6 @@ const initDrawPage = () => {
   document.querySelector('#clearButton').addEventListener('click', drawController.clearServerDrawing);
 }
 
-window.onload = init;
+$(document).ready(function(){
+  init();
+});
