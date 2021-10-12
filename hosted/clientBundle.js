@@ -38,53 +38,6 @@ var drawController = {
     document.querySelector('#colorPicker').value = drawController.ctx.strokeStyle;
   }
 };
-var mouse = {
-  getMouse: function getMouse(e) {
-    var mouseLocation = {};
-    mouseLocation.x = e.pageX - e.target.offsetLeft;
-    mouseLocation.y = e.pageY - e.target.offsetTop;
-    return mouseLocation;
-  },
-  mouseDown: function mouseDown(e) {
-    if (drawController.lockInput) return;
-    var mouseLocation = mouse.getMouse(e);
-    drawController.dragging = true;
-
-    if (e.altKey) {
-      drawController.setToColorAtLocation(mouseLocation);
-      return;
-    }
-
-    drawController.ctx.moveTo(mouseLocation.x, mouseLocation.y);
-    drawController.strokeStart.x = mouseLocation.x;
-    drawController.strokeStart.y = mouseLocation.y;
-  },
-  mouseMove: function mouseMove(e) {
-    if (!drawController.dragging || drawController.lockInput) return;
-    var mouseLocation = mouse.getMouse(e);
-
-    if (e.altKey) {
-      drawController.setToColorAtLocation(mouseLocation);
-      return;
-    }
-
-    drawController.ctx.beginPath();
-    drawController.ctx.moveTo(drawController.strokeStart.x, drawController.strokeStart.y);
-    drawController.ctx.strokeStyle = drawController.strokeStyle;
-    drawController.ctx.lineWidth = drawController.lineWidth;
-    drawController.ctx.lineTo(mouseLocation.x, mouseLocation.y);
-    drawController.ctx.stroke();
-    sendPathToServer(mouseLocation);
-    drawController.strokeStart.x = mouseLocation.x;
-    drawController.strokeStart.y = mouseLocation.y;
-  },
-  mouseUp: function mouseUp(e) {
-    drawController.dragging = false;
-  },
-  mouseOut: function mouseOut(e) {
-    drawController.dragging = false;
-  }
-};
 
 var onKeyDown = function onKeyDown(e) {
   if (e.key === 'Alt') {
@@ -168,10 +121,7 @@ var initDrawPage = function initDrawPage() {
   });
   $('#colorPicker').colorpicker();
   $('#colorPicker').on('colorpickerChange', drawController.changeStrokeColor);
-  drawController.canvas.onmousedown = mouse.mouseDown;
-  drawController.canvas.onmousemove = mouse.mouseMove;
-  drawController.canvas.onmouseup = mouse.mouseUp;
-  drawController.canvas.onmouseout = mouse.mouseOut;
+  mouseController.setupMouseListeners(drawController);
   document.addEventListener('keydown', onKeyDown);
   document.addEventListener('keyup', onKeyUp);
   document.querySelector('#lineWidthSelector').onchange = drawController.changeLineWidth;
@@ -181,6 +131,61 @@ var initDrawPage = function initDrawPage() {
 $(document).ready(function () {
   init();
 });
+"use strict";
+
+var mouseController = {
+  setupMouseListeners: function setupMouseListeners(drawController) {
+    drawController.canvas.onmousedown = mouseController.mouseDown;
+    drawController.canvas.onmousemove = mouseController.mouseMove;
+    drawController.canvas.onmouseup = mouseController.mouseUp;
+    drawController.canvas.onmouseout = mouseController.mouseOut;
+  },
+  getMouse: function getMouse(e) {
+    var mouseLocation = {};
+    mouseLocation.x = e.pageX - e.target.offsetLeft;
+    mouseLocation.y = e.pageY - e.target.offsetTop;
+    return mouseLocation;
+  },
+  mouseDown: function mouseDown(e) {
+    if (drawController.lockInput) return;
+    var mouseLocation = mouseController.getMouse(e);
+    drawController.dragging = true;
+
+    if (e.altKey) {
+      drawController.setToColorAtLocation(mouseLocation);
+      return;
+    }
+
+    drawController.ctx.moveTo(mouseLocation.x, mouseLocation.y);
+    drawController.strokeStart.x = mouseLocation.x;
+    drawController.strokeStart.y = mouseLocation.y;
+  },
+  mouseMove: function mouseMove(e) {
+    if (!drawController.dragging || drawController.lockInput) return;
+    var mouseLocation = mouseController.getMouse(e);
+
+    if (e.altKey) {
+      drawController.setToColorAtLocation(mouseLocation);
+      return;
+    }
+
+    drawController.ctx.beginPath();
+    drawController.ctx.moveTo(drawController.strokeStart.x, drawController.strokeStart.y);
+    drawController.ctx.strokeStyle = drawController.strokeStyle;
+    drawController.ctx.lineWidth = drawController.lineWidth;
+    drawController.ctx.lineTo(mouseLocation.x, mouseLocation.y);
+    drawController.ctx.stroke();
+    sendPathToServer(mouseLocation);
+    drawController.strokeStart.x = mouseLocation.x;
+    drawController.strokeStart.y = mouseLocation.y;
+  },
+  mouseUp: function mouseUp(e) {
+    drawController.dragging = false;
+  },
+  mouseOut: function mouseOut(e) {
+    drawController.dragging = false;
+  }
+};
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }

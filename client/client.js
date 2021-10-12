@@ -70,67 +70,6 @@ let drawController = {
   }
 };
 
-let mouse = {
-  getMouse: (e) => {
-    let mouseLocation = {}
-    mouseLocation.x = e.pageX - e.target.offsetLeft;
-    mouseLocation.y = e.pageY - e.target.offsetTop;
-    return mouseLocation;
-  },
-  
-  mouseDown : (e) => {
-    if (drawController.lockInput) return;
-    
-    let mouseLocation = mouse.getMouse(e);
-    
-    drawController.dragging = true;
-    
-    // EYE DROPPER while holding alt
-    if (e.altKey) {
-      drawController.setToColorAtLocation(mouseLocation);
-      return;
-    }
-    
-    // drawController.ctx.beginPath();
-    drawController.ctx.moveTo(mouseLocation.x, mouseLocation.y);
-    // update the initial stroke location to give to the server
-    drawController.strokeStart.x = mouseLocation.x;
-    drawController.strokeStart.y = mouseLocation.y;
-  },
-  
-  mouseMove : (e) => {
-    if (!drawController.dragging || drawController.lockInput) return;
-    
-    let mouseLocation = mouse.getMouse(e);
-    
-    if (e.altKey) {
-      drawController.setToColorAtLocation(mouseLocation);
-      return;
-    }
-    
-    drawController.ctx.beginPath();
-    drawController.ctx.moveTo(drawController.strokeStart.x, drawController.strokeStart.y);
-    drawController.ctx.strokeStyle = drawController.strokeStyle;
-    drawController.ctx.lineWidth = drawController.lineWidth;
-    drawController.ctx.lineTo(mouseLocation.x, mouseLocation.y);
-    drawController.ctx.stroke();
-    
-    sendPathToServer(mouseLocation);
-    
-    drawController.strokeStart.x = mouseLocation.x;
-    drawController.strokeStart.y = mouseLocation.y;
-  },
-  
-  mouseUp: (e) => {
-    drawController.dragging = false;
-  },
-  
-  mouseOut: (e) => {
-    drawController.dragging = false;
-  }
-  
-};
-
 const onKeyDown = (e) => {
   if (e.key === 'Alt') {
     e.preventDefault();
@@ -231,11 +170,8 @@ const initDrawPage = () => {
   $('#colorPicker').colorpicker();
   $('#colorPicker').on('colorpickerChange', drawController.changeStrokeColor);
   
-  // Mouse event listeners
-  drawController.canvas.onmousedown = mouse.mouseDown;
-  drawController.canvas.onmousemove = mouse.mouseMove;
-  drawController.canvas.onmouseup = mouse.mouseUp;
-  drawController.canvas.onmouseout = mouse.mouseOut;
+  mouseController.setupMouseListeners(drawController);
+  
   // Keyboard listener
   document.addEventListener('keydown', onKeyDown);
   document.addEventListener('keyup', onKeyUp);
