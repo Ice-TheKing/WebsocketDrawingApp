@@ -58,7 +58,6 @@ let drawController = {
   },
   
   setToColorAtLocation: (location) => {
-    console.dir(location);
     let pxData = drawController.ctx.getImageData(location.x, location.y, 1, 1);
     drawController.strokeStyle = `rgba(${pxData.data[0]}, ${pxData.data[1]}, ${pxData.data[2]}, ${pxData.data[3]})`;
     
@@ -171,6 +170,7 @@ const initDrawPage = () => {
   $('#colorPicker').on('colorpickerChange', drawController.changeStrokeColor);
   
   mouseController.setupMouseListeners(drawController);
+  touchController.setupTouchListeners(drawController);
   
   // Keyboard listener
   document.addEventListener('keydown', onKeyDown);

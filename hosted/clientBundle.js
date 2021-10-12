@@ -31,7 +31,6 @@ var drawController = {
     fillBackground();
   },
   setToColorAtLocation: function setToColorAtLocation(location) {
-    console.dir(location);
     var pxData = drawController.ctx.getImageData(location.x, location.y, 1, 1);
     drawController.strokeStyle = "rgba(".concat(pxData.data[0], ", ").concat(pxData.data[1], ", ").concat(pxData.data[2], ", ").concat(pxData.data[3], ")");
     drawController.ctx.strokeStyle = drawController.strokeStyle;
@@ -122,6 +121,7 @@ var initDrawPage = function initDrawPage() {
   $('#colorPicker').colorpicker();
   $('#colorPicker').on('colorpickerChange', drawController.changeStrokeColor);
   mouseController.setupMouseListeners(drawController);
+  touchController.setupTouchListeners(drawController);
   document.addEventListener('keydown', onKeyDown);
   document.addEventListener('keyup', onKeyUp);
   document.querySelector('#lineWidthSelector').onchange = drawController.changeLineWidth;
@@ -321,3 +321,44 @@ var renderDrawPage = function renderDrawPage(colorPickerOnChange) {
 };
 
 reactModule.renderDrawPage = renderDrawPage;
+"use strict";
+
+var touchController = {
+  setupTouchListeners: function setupTouchListeners(drawController) {
+    drawController.canvas.addEventListener("touchstart", touchController.touchStart);
+    drawController.canvas.addEventListener("touchmove", touchController.touchMove);
+    drawController.canvas.addEventListener("touchend", touchController.touchEnd);
+    drawController.canvas.addEventListener("touchcancel", touchController.touchEnd);
+  },
+  getTouch: function getTouch(e) {
+    var touchLocation = {};
+    var touches = e.touches[0];
+    touchLocation.x = touches.pageX - touches.target.offsetLeft;
+    touchLocation.y = touches.pageY - touches.target.offsetTop;
+    return touchLocation;
+  },
+  touchStart: function touchStart(e) {
+    if (drawController.lockInput) return;
+    var touchLocation = touchController.getTouch(e);
+    drawController.dragging = true;
+    drawController.ctx.moveTo(touchLocation.x, touchLocation.y);
+    drawController.strokeStart.x = touchLocation.x;
+    drawController.strokeStart.y = touchLocation.y;
+  },
+  touchMove: function touchMove(e) {
+    if (!drawController.dragging || drawController.lockInput) return;
+    var touchLocation = touchController.getTouch(e);
+    drawController.ctx.beginPath();
+    drawController.ctx.moveTo(drawController.strokeStart.x, drawController.strokeStart.y);
+    drawController.ctx.strokeStyle = drawController.strokeStyle;
+    drawController.ctx.lineWidth = drawController.lineWidth;
+    drawController.ctx.lineTo(touchLocation.x, touchLocation.y);
+    drawController.ctx.stroke();
+    sendPathToServer(touchLocation);
+    drawController.strokeStart.x = touchLocation.x;
+    drawController.strokeStart.y = touchLocation.y;
+  },
+  touchEnd: function touchEnd(e) {
+    drawController.dragging = false;
+  }
+};

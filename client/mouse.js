@@ -7,7 +7,7 @@ const mouseController = {
   },
   
   getMouse: (e) => {
-    let mouseLocation = {}
+    let mouseLocation = {};
     mouseLocation.x = e.pageX - e.target.offsetLeft;
     mouseLocation.y = e.pageY - e.target.offsetTop;
     return mouseLocation;
