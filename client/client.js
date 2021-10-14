@@ -10,15 +10,8 @@
 // undo/redo library:
 // https://codepen.io/abidibo/pen/rmGBc
 
-// canvas eye dropper tool:
-// https://stackoverflow.com/questions/17221802/canvas-eyedropper
-
 // Techniques for making brushes:
 // http://perfectionkills.com/exploring-canvas-drawing-techniques/
-
-// Mobile touch events:
-// https://mobiforge.com/design-development/html5-mobile-web-touch-events
-// https://www.youtube.com/watch?v=ga_SLzsUdTY
 
 let socket;
 
@@ -39,6 +32,7 @@ let drawController = {
   strokeStart: {},
   previousMouseLocation: null,
   lockInput: false,
+  colorWheel: {},
   
   changeLineWidth: (e) => {
     drawController.lineWidth = e.target.value;
@@ -46,7 +40,6 @@ let drawController = {
   
   changeStrokeColor: (e) => {
     const hexColor = e.target.attributes[1].value;
-    // drawController.strokeStyle = e.target.value;
     drawController.strokeStyle = hexColor;
   },
   
@@ -63,11 +56,11 @@ let drawController = {
     let pxData = drawController.ctx.getImageData(location.x, location.y, 1, 1);
     drawController.strokeStyle = `rgba(${pxData.data[0]}, ${pxData.data[1]}, ${pxData.data[2]}, ${pxData.data[3]})`;
     
-    // TODO: This line is redundant. Right now it is only here because the #colorPicker.value can only read a #HHEEXX value, but the drawController.strokeStyle
+    // TODO: This line is redundant. Right now it is only here because the colorwheel can't read the rgba value, but the drawController.strokeStyle
     // is a rgba() value. Setting the canvas ctx automatically converts it to a hex, so I'm just using that functionality instead of converting it myself
     drawController.ctx.strokeStyle = drawController.strokeStyle;
     
-    document.querySelector('#colorPicker').value = drawController.ctx.strokeStyle;
+    drawController.colorWheel.attributes[1].value = drawController.ctx.strokeStyle;
   }
 };
 
@@ -163,15 +156,9 @@ const initDrawPage = () => {
   
   fillBackground();
   
-  // Init color picker
-  // disable HTML5 color picker
-  $('#colorPicker').click((e) => {
-    e.preventDefault();
-  });
-  $('#colorPicker').colorpicker();
-  // $('#colorPicker').on('colorpickerChange', drawController.changeStrokeColor);
-  let colorWheel = document.querySelector('#colorWheel').onchange = drawController.changeStrokeColor;
-  console.dir(colorWheel);
+  // Init color wheel
+  drawController.colorWheel = document.querySelector('#colorWheel');
+  drawController.colorWheel.onchange = drawController.changeStrokeColor;
   
   mouseController.setupMouseListeners(drawController);
   touchController.setupTouchListeners(drawController);

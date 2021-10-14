@@ -17,6 +17,7 @@ var drawController = {
   strokeStart: {},
   previousMouseLocation: null,
   lockInput: false,
+  colorWheel: {},
   changeLineWidth: function changeLineWidth(e) {
     drawController.lineWidth = e.target.value;
   },
@@ -35,7 +36,7 @@ var drawController = {
     var pxData = drawController.ctx.getImageData(location.x, location.y, 1, 1);
     drawController.strokeStyle = "rgba(".concat(pxData.data[0], ", ").concat(pxData.data[1], ", ").concat(pxData.data[2], ", ").concat(pxData.data[3], ")");
     drawController.ctx.strokeStyle = drawController.strokeStyle;
-    document.querySelector('#colorPicker').value = drawController.ctx.strokeStyle;
+    drawController.colorWheel.attributes[1].value = drawController.ctx.strokeStyle;
   }
 };
 
@@ -116,12 +117,8 @@ var initDrawPage = function initDrawPage() {
   drawController.ctx.lineJoin = DRAW_CONSTS.DEFAULT_LINE_JOIN;
   drawController.ctx.canvas.style.touchAction = "none";
   fillBackground();
-  $('#colorPicker').click(function (e) {
-    e.preventDefault();
-  });
-  $('#colorPicker').colorpicker();
-  var colorWheel = document.querySelector('#colorWheel').onchange = drawController.changeStrokeColor;
-  console.dir(colorWheel);
+  drawController.colorWheel = document.querySelector('#colorWheel');
+  drawController.colorWheel.onchange = drawController.changeStrokeColor;
   mouseController.setupMouseListeners(drawController);
   touchController.setupTouchListeners(drawController);
   document.addEventListener('keydown', onKeyDown);
@@ -284,16 +281,12 @@ var CanvasButtons = function (_React$Component2) {
         value: "10"
       }, "10"))), React.createElement("reinvented-color-wheel", {
         id: "colorWheel",
-        hex: "#ff3e00",
+        hex: "#ff0000",
         "wheel-diameter": "200",
         "wheel-thickness": "20",
         "handle-diameter": "16",
         "wheel-reflects-saturation": "false"
-      }), React.createElement("label", null, "Stroke Color:", React.createElement("input", {
-        type: "color",
-        value: "#ff0000",
-        id: "colorPicker"
-      })), React.createElement("span", null, React.createElement("input", {
+      }), React.createElement("span", null, React.createElement("input", {
         id: "clearButton",
         type: "button",
         value: "Clear"

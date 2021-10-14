@@ -35,15 +35,12 @@ class CanvasButtons extends React.Component {
         </label>
         <reinvented-color-wheel
           id="colorWheel"
-          hex="#ff3e00"
+          hex="#ff0000"
           wheel-diameter="200"
           wheel-thickness="20"
           handle-diameter="16"
           wheel-reflects-saturation="false"
           ></reinvented-color-wheel>
-        <label>Stroke Color:
-          <input type="color" value="#ff0000" id="colorPicker"/>
-        </label>
         	
         <span><input id="clearButton" type="button" value="Clear"/></span>
       </div>
