@@ -33,6 +33,14 @@ class CanvasButtons extends React.Component {
             <option value="10">10</option>
           </select>
         </label>
+        <reinvented-color-wheel
+          id="colorWheel"
+          hex="#ff3e00"
+          wheel-diameter="200"
+          wheel-thickness="20"
+          handle-diameter="16"
+          wheel-reflects-saturation="false"
+          ></reinvented-color-wheel>
         <label>Stroke Color:
           <input type="color" value="#ff0000" id="colorPicker"/>
         </label>
@@ -49,6 +57,7 @@ class DrawPage extends React.Component {
       <div>
         <Canvas />
         <CanvasButtons />
+        
       </div>
     );
   }

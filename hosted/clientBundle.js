@@ -21,7 +21,8 @@ var drawController = {
     drawController.lineWidth = e.target.value;
   },
   changeStrokeColor: function changeStrokeColor(e) {
-    drawController.strokeStyle = e.target.value;
+    var hexColor = e.target.attributes[1].value;
+    drawController.strokeStyle = hexColor;
   },
   clearServerDrawing: function clearServerDrawing(e) {
     socket.emit('clearDrawing');
@@ -119,7 +120,8 @@ var initDrawPage = function initDrawPage() {
     e.preventDefault();
   });
   $('#colorPicker').colorpicker();
-  $('#colorPicker').on('colorpickerChange', drawController.changeStrokeColor);
+  var colorWheel = document.querySelector('#colorWheel').onchange = drawController.changeStrokeColor;
+  console.dir(colorWheel);
   mouseController.setupMouseListeners(drawController);
   touchController.setupTouchListeners(drawController);
   document.addEventListener('keydown', onKeyDown);
@@ -280,7 +282,14 @@ var CanvasButtons = function (_React$Component2) {
         value: "9"
       }, "9"), React.createElement("option", {
         value: "10"
-      }, "10"))), React.createElement("label", null, "Stroke Color:", React.createElement("input", {
+      }, "10"))), React.createElement("reinvented-color-wheel", {
+        id: "colorWheel",
+        hex: "#ff3e00",
+        "wheel-diameter": "200",
+        "wheel-thickness": "20",
+        "handle-diameter": "16",
+        "wheel-reflects-saturation": "false"
+      }), React.createElement("label", null, "Stroke Color:", React.createElement("input", {
         type: "color",
         value: "#ff0000",
         id: "colorPicker"

@@ -45,7 +45,9 @@ let drawController = {
   },
   
   changeStrokeColor: (e) => {
-    drawController.strokeStyle = e.target.value;
+    const hexColor = e.target.attributes[1].value;
+    // drawController.strokeStyle = e.target.value;
+    drawController.strokeStyle = hexColor;
   },
   
   clearServerDrawing: (e) => {
@@ -167,7 +169,9 @@ const initDrawPage = () => {
     e.preventDefault();
   });
   $('#colorPicker').colorpicker();
-  $('#colorPicker').on('colorpickerChange', drawController.changeStrokeColor);
+  // $('#colorPicker').on('colorpickerChange', drawController.changeStrokeColor);
+  let colorWheel = document.querySelector('#colorWheel').onchange = drawController.changeStrokeColor;
+  console.dir(colorWheel);
   
   mouseController.setupMouseListeners(drawController);
   touchController.setupTouchListeners(drawController);
