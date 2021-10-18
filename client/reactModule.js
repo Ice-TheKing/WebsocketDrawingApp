@@ -22,7 +22,7 @@ class Buttons extends React.Component {
             <i className="bi bi-eraser-fill"></i>
           </button>
         </div>
-        <input type="range" className="tool" min="0" max="20" id="lineWidth" />
+        <input type="range" className="tool" min="1" max="20" id="lineWidth" />
         <button type="button" className="btn btn-danger tool" id="clearButton">Clear</button>
       </div>
     );

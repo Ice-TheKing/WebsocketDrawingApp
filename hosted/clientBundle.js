@@ -272,7 +272,7 @@ var Buttons = function (_React$Component2) {
       }))), React.createElement("input", {
         type: "range",
         className: "tool",
-        min: "0",
+        min: "1",
         max: "20",
         id: "lineWidth"
       }), React.createElement("button", {
