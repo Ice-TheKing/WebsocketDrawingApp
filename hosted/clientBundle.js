@@ -2,7 +2,7 @@
 
 var socket;
 var DRAW_CONSTS = {
-  DEFAULT_LINE_WIDTH: 3,
+  DEFAULT_LINE_WIDTH: 8,
   DEFAULT_STROKE_STYLE: "#ff0000",
   DEFAULT_LINE_CAP: "round",
   DEFAULT_LINE_JOIN: "round",
@@ -125,7 +125,9 @@ var initDrawPage = function initDrawPage() {
   touchController.setupTouchListeners(drawController);
   document.addEventListener('keydown', onKeyDown);
   document.addEventListener('keyup', onKeyUp);
-  document.querySelector('#lineWidthSelector').onchange = drawController.changeLineWidth;
+  var lineWidthSlider = document.querySelector('#lineWidth');
+  lineWidthSlider.value = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
+  lineWidthSlider.onchange = drawController.changeLineWidth;
   document.querySelector('#clearButton').addEventListener('click', drawController.clearServerDrawing);
   $('.collapse').collapse();
 };
@@ -255,38 +257,29 @@ var Buttons = function (_React$Component2) {
     value: function render() {
       return React.createElement("div", {
         id: "controls"
-      }, React.createElement("label", null, "Tool:", React.createElement("select", {
-        id: "toolChooser"
-      }, React.createElement("option", {
-        value: "toolPencil"
-      }, "Pencil"))), React.createElement("label", null, "Line Width:", React.createElement("select", {
-        id: "lineWidthSelector"
-      }, React.createElement("option", {
-        value: "1"
-      }, "1"), React.createElement("option", {
-        value: "2"
-      }, "2"), React.createElement("option", {
-        value: "3",
-        selected: true
-      }, "3"), React.createElement("option", {
-        value: "4"
-      }, "4"), React.createElement("option", {
-        value: "5"
-      }, "5"), React.createElement("option", {
-        value: "6"
-      }, "6"), React.createElement("option", {
-        value: "7"
-      }, "7"), React.createElement("option", {
-        value: "8"
-      }, "8"), React.createElement("option", {
-        value: "9"
-      }, "9"), React.createElement("option", {
-        value: "10"
-      }, "10"))), React.createElement("span", null, React.createElement("input", {
-        id: "clearButton",
+      }, React.createElement("div", {
+        className: "tools"
+      }, React.createElement("button", {
         type: "button",
-        value: "Clear"
-      })));
+        "class": "btn tool btn-outline-secondary"
+      }, React.createElement("i", {
+        className: "bi bi-brush"
+      })), React.createElement("button", {
+        type: "button",
+        "class": "btn tool btn-outline-secondary"
+      }, React.createElement("i", {
+        className: "bi bi-eraser-fill"
+      }))), React.createElement("input", {
+        type: "range",
+        className: "tool",
+        min: "0",
+        max: "20",
+        id: "lineWidth"
+      }), React.createElement("button", {
+        type: "button",
+        className: "btn btn-danger tool",
+        id: "clearButton"
+      }, "Clear"));
     }
   }]);
 

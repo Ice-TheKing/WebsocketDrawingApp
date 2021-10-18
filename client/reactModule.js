@@ -14,28 +14,16 @@ class Buttons extends React.Component {
   render() {
     return (
       <div id="controls" >
-        <label>Tool:
-          <select id="toolChooser">
-            <option value="toolPencil">Pencil</option>
-          </select>
-        </label>	
-        <label>Line Width: 
-          <select id="lineWidthSelector">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3" selected>3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
-          </select>
-        </label>
-        
-        	
-        <span><input id="clearButton" type="button" value="Clear"/></span>
+        <div className="tools">
+          <button type="button" class="btn tool btn-outline-secondary">
+            <i className="bi bi-brush"></i>
+          </button>
+          <button type="button" class="btn tool btn-outline-secondary">
+            <i className="bi bi-eraser-fill"></i>
+          </button>
+        </div>
+        <input type="range" className="tool" min="0" max="20" id="lineWidth" />
+        <button type="button" className="btn btn-danger tool" id="clearButton">Clear</button>
       </div>
     );
   }

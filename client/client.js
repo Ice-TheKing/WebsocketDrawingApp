@@ -16,7 +16,7 @@
 let socket;
 
 const DRAW_CONSTS = {
-  DEFAULT_LINE_WIDTH: 3,
+  DEFAULT_LINE_WIDTH: 8,
   DEFAULT_STROKE_STYLE: "#ff0000",
   DEFAULT_LINE_CAP: "round",
   DEFAULT_LINE_JOIN: "round",
@@ -170,7 +170,10 @@ const initDrawPage = () => {
   document.addEventListener('keyup', onKeyUp);
   
   // Other listeners
-  document.querySelector('#lineWidthSelector').onchange = drawController.changeLineWidth;
+  const lineWidthSlider = document.querySelector('#lineWidth');
+  lineWidthSlider.value = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
+  lineWidthSlider.onchange = drawController.changeLineWidth;
+  
   document.querySelector('#clearButton').addEventListener('click', drawController.clearServerDrawing);
   
   // bootstrap plugins
