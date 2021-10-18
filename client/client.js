@@ -139,7 +139,9 @@ const init = () => {
 const initDrawPage = () => {
   /* INIT CANVAS/DRAW APP */
   // render components in react
-  reactModule.renderDrawPage();
+  reactModule.renderCanvas('content');
+  reactModule.renderButtons('leftBar');
+  reactModule.renderColorWheel('rightBar');
   
   // Init Draw Globals
   drawController.canvas = document.querySelector('#mainCanvas');
@@ -170,6 +172,9 @@ const initDrawPage = () => {
   // Other listeners
   document.querySelector('#lineWidthSelector').onchange = drawController.changeLineWidth;
   document.querySelector('#clearButton').addEventListener('click', drawController.clearServerDrawing);
+  
+  // bootstrap plugins
+  $('.collapse').collapse();
 }
 
 $(document).ready(function(){

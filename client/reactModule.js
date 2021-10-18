@@ -10,10 +10,10 @@ class Canvas extends React.Component {
   }
 }
 
-class CanvasButtons extends React.Component {
+class Buttons extends React.Component {
   render() {
     return (
-      <div id="controls">
+      <div id="controls" >
         <label>Tool:
           <select id="toolChooser">
             <option value="toolPencil">Pencil</option>
@@ -33,14 +33,7 @@ class CanvasButtons extends React.Component {
             <option value="10">10</option>
           </select>
         </label>
-        <reinvented-color-wheel
-          id="colorWheel"
-          hex="#ff0000"
-          wheel-diameter="200"
-          wheel-thickness="20"
-          handle-diameter="16"
-          wheel-reflects-saturation="false"
-          ></reinvented-color-wheel>
+        
         	
         <span><input id="clearButton" type="button" value="Clear"/></span>
       </div>
@@ -48,23 +41,51 @@ class CanvasButtons extends React.Component {
   }
 }
 
-class DrawPage extends React.Component {
+class ColorWheel extends React.Component {
   render() {
     return (
-      <div>
-        <Canvas />
-        <CanvasButtons />
-        
-      </div>
+    <reinvented-color-wheel
+          id="colorWheel"
+          hex="#ff0000"
+          wheel-diameter="200"
+          wheel-thickness="20"
+          handle-diameter="16"
+          wheel-reflects-saturation="false"
+          ></reinvented-color-wheel>
     );
   }
 }
 
-const renderDrawPage = (colorPickerOnChange) => {
+
+/*class renderCanvas extends React.Component {
+  render() {
+    return (
+      <Canvas />
+    );
+  }
+}*/
+
+const renderCanvas = (renderLocation) => {
   ReactDOM.render(
-    <DrawPage />,
-    document.getElementById('content'),
+    <Canvas />,
+    document.getElementById(renderLocation),
   );
 };
 
-reactModule.renderDrawPage = renderDrawPage;
+const renderButtons = (renderLocation) => {
+  ReactDOM.render(
+    <Buttons />,
+    document.getElementById(renderLocation),
+  );
+};
+
+const renderColorWheel = (renderLocation) => {
+  ReactDOM.render(
+    <ColorWheel />,
+    document.getElementById(renderLocation),
+  );
+};
+
+reactModule.renderCanvas = renderCanvas;
+reactModule.renderButtons = renderButtons;
+reactModule.renderColorWheel = renderColorWheel;

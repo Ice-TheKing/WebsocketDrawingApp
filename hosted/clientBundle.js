@@ -106,7 +106,9 @@ var init = function init() {
 };
 
 var initDrawPage = function initDrawPage() {
-  reactModule.renderDrawPage();
+  reactModule.renderCanvas('content');
+  reactModule.renderButtons('leftBar');
+  reactModule.renderColorWheel('rightBar');
   drawController.canvas = document.querySelector('#mainCanvas');
   drawController.ctx = drawController.canvas.getContext('2d');
   drawController.lineWidth = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
@@ -125,6 +127,7 @@ var initDrawPage = function initDrawPage() {
   document.addEventListener('keyup', onKeyUp);
   document.querySelector('#lineWidthSelector').onchange = drawController.changeLineWidth;
   document.querySelector('#clearButton').addEventListener('click', drawController.clearServerDrawing);
+  $('.collapse').collapse();
 };
 
 $(document).ready(function () {
@@ -236,18 +239,18 @@ var Canvas = function (_React$Component) {
   return Canvas;
 }(React.Component);
 
-var CanvasButtons = function (_React$Component2) {
-  _inherits(CanvasButtons, _React$Component2);
+var Buttons = function (_React$Component2) {
+  _inherits(Buttons, _React$Component2);
 
-  var _super2 = _createSuper(CanvasButtons);
+  var _super2 = _createSuper(Buttons);
 
-  function CanvasButtons() {
-    _classCallCheck(this, CanvasButtons);
+  function Buttons() {
+    _classCallCheck(this, Buttons);
 
     return _super2.apply(this, arguments);
   }
 
-  _createClass(CanvasButtons, [{
+  _createClass(Buttons, [{
     key: "render",
     value: function render() {
       return React.createElement("div", {
@@ -279,14 +282,7 @@ var CanvasButtons = function (_React$Component2) {
         value: "9"
       }, "9"), React.createElement("option", {
         value: "10"
-      }, "10"))), React.createElement("reinvented-color-wheel", {
-        id: "colorWheel",
-        hex: "#ff0000",
-        "wheel-diameter": "200",
-        "wheel-thickness": "20",
-        "handle-diameter": "16",
-        "wheel-reflects-saturation": "false"
-      }), React.createElement("span", null, React.createElement("input", {
+      }, "10"))), React.createElement("span", null, React.createElement("input", {
         id: "clearButton",
         type: "button",
         value: "Clear"
@@ -294,35 +290,52 @@ var CanvasButtons = function (_React$Component2) {
     }
   }]);
 
-  return CanvasButtons;
+  return Buttons;
 }(React.Component);
 
-var DrawPage = function (_React$Component3) {
-  _inherits(DrawPage, _React$Component3);
+var ColorWheel = function (_React$Component3) {
+  _inherits(ColorWheel, _React$Component3);
 
-  var _super3 = _createSuper(DrawPage);
+  var _super3 = _createSuper(ColorWheel);
 
-  function DrawPage() {
-    _classCallCheck(this, DrawPage);
+  function ColorWheel() {
+    _classCallCheck(this, ColorWheel);
 
     return _super3.apply(this, arguments);
   }
 
-  _createClass(DrawPage, [{
+  _createClass(ColorWheel, [{
     key: "render",
     value: function render() {
-      return React.createElement("div", null, React.createElement(Canvas, null), React.createElement(CanvasButtons, null));
+      return React.createElement("reinvented-color-wheel", {
+        id: "colorWheel",
+        hex: "#ff0000",
+        "wheel-diameter": "200",
+        "wheel-thickness": "20",
+        "handle-diameter": "16",
+        "wheel-reflects-saturation": "false"
+      });
     }
   }]);
 
-  return DrawPage;
+  return ColorWheel;
 }(React.Component);
 
-var renderDrawPage = function renderDrawPage(colorPickerOnChange) {
-  ReactDOM.render(React.createElement(DrawPage, null), document.getElementById('content'));
+var renderCanvas = function renderCanvas(renderLocation) {
+  ReactDOM.render(React.createElement(Canvas, null), document.getElementById(renderLocation));
 };
 
-reactModule.renderDrawPage = renderDrawPage;
+var renderButtons = function renderButtons(renderLocation) {
+  ReactDOM.render(React.createElement(Buttons, null), document.getElementById(renderLocation));
+};
+
+var renderColorWheel = function renderColorWheel(renderLocation) {
+  ReactDOM.render(React.createElement(ColorWheel, null), document.getElementById(renderLocation));
+};
+
+reactModule.renderCanvas = renderCanvas;
+reactModule.renderButtons = renderButtons;
+reactModule.renderColorWheel = renderColorWheel;
 "use strict";
 
 var touchController = {
