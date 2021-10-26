@@ -128,8 +128,6 @@ var initDrawPage = function initDrawPage() {
   var lineWidthSlider = document.querySelector('#lineWidth');
   lineWidthSlider.value = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
   lineWidthSlider.onchange = drawController.changeLineWidth;
-  document.querySelector('#clearButton').addEventListener('click', drawController.clearServerDrawing);
-  $('.collapse').collapse();
 };
 
 $(document).ready(function () {
@@ -278,8 +276,47 @@ var Buttons = function (_React$Component2) {
       }), React.createElement("button", {
         type: "button",
         className: "btn btn-danger tool",
-        id: "clearButton"
-      }, "Clear"));
+        id: "clearButton",
+        "data-toggle": "modal",
+        "data-target": "#clearModal"
+      }, "Clear"), React.createElement("div", {
+        className: "modal fade",
+        id: "clearModal",
+        tabindex: "-1",
+        role: "dialog",
+        "aria-labelledby": "exampleModalLabel",
+        "aria-hidden": "true"
+      }, React.createElement("div", {
+        className: "modal-dialog",
+        role: "document"
+      }, React.createElement("div", {
+        className: "modal-content"
+      }, React.createElement("div", {
+        className: "modal-header"
+      }, React.createElement("h5", {
+        className: "modal-title",
+        id: "exampleModalLabel"
+      }, "Are you sure you want to clear the drawing?"), React.createElement("button", {
+        type: "button",
+        "class": "close",
+        "data-dismiss": "modal",
+        "aria-label": "Close"
+      }, React.createElement("span", {
+        "aria-hidden": "true"
+      }, "\xD7"))), React.createElement("div", {
+        className: "modal-body"
+      }, "This action cannot be undone."), React.createElement("div", {
+        className: "modal-footer"
+      }, React.createElement("button", {
+        type: "button",
+        "class": "btn btn-secondary",
+        "data-dismiss": "modal"
+      }, "Close"), React.createElement("button", {
+        type: "button",
+        id: "clearDrawingConfirm",
+        "class": "btn btn-danger",
+        "data-dismiss": "modal"
+      }, "Clear Drawing"))))));
     }
   }]);
 
@@ -319,7 +356,9 @@ var renderCanvas = function renderCanvas(renderLocation) {
 };
 
 var renderButtons = function renderButtons(renderLocation) {
-  ReactDOM.render(React.createElement(Buttons, null), document.getElementById(renderLocation));
+  ReactDOM.render(React.createElement(Buttons, null), document.getElementById(renderLocation), function () {
+    document.querySelector('#clearDrawingConfirm').addEventListener('click', drawController.clearServerDrawing);
+  });
 };
 
 var renderColorWheel = function renderColorWheel(renderLocation) {

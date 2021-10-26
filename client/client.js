@@ -174,10 +174,7 @@ const initDrawPage = () => {
   lineWidthSlider.value = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
   lineWidthSlider.onchange = drawController.changeLineWidth;
   
-  document.querySelector('#clearButton').addEventListener('click', drawController.clearServerDrawing);
-  
-  // bootstrap plugins
-  $('.collapse').collapse();
+  //document.querySelector('#clearButton').addEventListener('click', drawController.clearServerDrawing);
 }
 
 $(document).ready(function(){

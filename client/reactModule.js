@@ -23,7 +23,29 @@ class Buttons extends React.Component {
           </button>
         </div>
         <input type="range" className="tool" min="1" max="20" id="lineWidth" />
-        <button type="button" className="btn btn-danger tool" id="clearButton">Clear</button>
+        
+        <button type="button" className="btn btn-danger tool" id="clearButton" data-toggle="modal" data-target="#clearModal">Clear</button>
+        
+        <div className="modal fade" id="clearModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="exampleModalLabel">Are you sure you want to clear the drawing?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                This action cannot be undone.
+              </div>
+              <div className="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="clearDrawingConfirm" class="btn btn-danger" data-dismiss="modal">Clear Drawing</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
       </div>
     );
   }
@@ -64,7 +86,9 @@ const renderButtons = (renderLocation) => {
   ReactDOM.render(
     <Buttons />,
     document.getElementById(renderLocation),
-  );
+    () => {
+      document.querySelector('#clearDrawingConfirm').addEventListener('click', drawController.clearServerDrawing);
+  });
 };
 
 const renderColorWheel = (renderLocation) => {
