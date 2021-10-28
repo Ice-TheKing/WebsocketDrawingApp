@@ -13,3 +13,30 @@
   float: right;
   clear: right;
 }
+
+@media (max-width: 1200px) {
+  .row {
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+  }
+  #leftBar {
+    order: 1;
+  }
+  #content {
+    order: 3;
+  }
+  #rightBar {
+    order: 2;
+  }
+  
+  .controls {
+    display: inline;
+    vertical-align: bottom;
+  }
+  .tool {
+    display: inline;
+    float: none;
+    clear: none;
+  }
+}

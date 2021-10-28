@@ -15,16 +15,18 @@ class Buttons extends React.Component {
     return (
       <div id="controls" >
         <div className="tools">
-          <button type="button" class="btn tool btn-outline-secondary">
-            <i className="bi bi-brush"></i>
-          </button>
-          <button type="button" class="btn tool btn-outline-secondary">
-            <i className="bi bi-eraser-fill"></i>
-          </button>
-        </div>
+        <button type="button" class="btn tool btn-outline-secondary">
+          <i className="bi bi-brush"></i>
+        </button>
+          
+        <button type="button" class="btn tool btn-outline-secondary">
+          <i className="bi bi-eraser-fill"></i>
+        </button>
+        
         <input type="range" className="tool" min="1" max="20" id="lineWidth" />
         
         <button type="button" className="btn btn-danger tool" id="clearButton" data-toggle="modal" data-target="#clearModal">Clear</button>
+        </div>
         
         <div className="modal fade" id="clearModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div className="modal-dialog" role="document">

@@ -267,7 +267,7 @@ var Buttons = function (_React$Component2) {
         "class": "btn tool btn-outline-secondary"
       }, React.createElement("i", {
         className: "bi bi-eraser-fill"
-      }))), React.createElement("input", {
+      })), React.createElement("input", {
         type: "range",
         className: "tool",
         min: "1",
@@ -279,7 +279,7 @@ var Buttons = function (_React$Component2) {
         id: "clearButton",
         "data-toggle": "modal",
         "data-target": "#clearModal"
-      }, "Clear"), React.createElement("div", {
+      }, "Clear")), React.createElement("div", {
         className: "modal fade",
         id: "clearModal",
         tabindex: "-1",
