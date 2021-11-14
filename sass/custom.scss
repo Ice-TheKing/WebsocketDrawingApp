@@ -30,13 +30,29 @@
     order: 2;
   }
   
-  .controls {
-    display: inline;
-    vertical-align: bottom;
+  #controls {
+    
   }
+  
+  .tools {
+    position: relative;
+    top: 150px;
+  }
+  
   .tool {
     display: inline;
     float: none;
     clear: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .tools {
+    top: 0px;
+  }
+  
+  .container {
+    margin-right: auto;
+    margin-left: 0;
   }
 }
