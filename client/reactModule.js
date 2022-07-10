@@ -101,8 +101,12 @@ const renderColorWheel = (renderLocation) => {
 };
 
 const setupNavLinks = () => {
-  document.querySelector('#room1').addEventListener('click', drawController.joinRoom);
-  document.querySelector('#room2').addEventListener('click', drawController.joinRoom);
+  document.querySelector('#room1').addEventListener('click', (e) => {
+    drawController.joinRoom(e.target.id);
+  });
+  document.querySelector('#room2').addEventListener('click', (e) => {
+    drawController.joinRoom(e.target.id);
+  });
 };
 
 reactModule.renderCanvas = renderCanvas;

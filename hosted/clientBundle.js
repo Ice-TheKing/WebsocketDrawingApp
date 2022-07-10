@@ -11,6 +11,7 @@ var DRAW_CONSTS = {
 var drawController = {
   canvas: null,
   ctx: null,
+  room: 'room1',
   dragging: false,
   lineWidth: null,
   strokeStyle: null,
@@ -26,7 +27,9 @@ var drawController = {
     drawController.strokeStyle = hexColor;
   },
   clearServerDrawing: function clearServerDrawing(e) {
-    socket.emit('clearDrawing');
+    socket.emit('clearDrawing', {
+      room: drawController.room
+    });
   },
   clearLocalCanvas: function clearLocalCanvas(e) {
     drawController.ctx.clearRect(0, 0, drawController.ctx.canvas.width, drawController.ctx.canvas.height);
@@ -38,8 +41,13 @@ var drawController = {
     drawController.ctx.strokeStyle = drawController.strokeStyle;
     drawController.colorWheel.attributes[1].value = drawController.ctx.strokeStyle;
   },
-  joinRoom: function joinRoom(e) {
-    console.dir(e);
+  joinRoom: function joinRoom(room) {
+    var data = {
+      oldRoom: drawController.room,
+      newRoom: room
+    };
+    socket.emit('joinRoom', data);
+    drawController.room = room;
   }
 };
 
@@ -81,7 +89,11 @@ var sendPathToServer = function sendPathToServer(mouseLocation) {
     style: drawController.strokeStyle,
     width: drawController.lineWidth
   };
-  socket.emit('pathToServer', path);
+  var data = {
+    room: drawController.room,
+    path: path
+  };
+  socket.emit('pathToServer', data);
 };
 
 var drawPathFromServer = function drawPathFromServer(data) {
@@ -374,8 +386,12 @@ var renderColorWheel = function renderColorWheel(renderLocation) {
 };
 
 var setupNavLinks = function setupNavLinks() {
-  document.querySelector('#room1').addEventListener('click', drawController.joinRoom);
-  document.querySelector('#room2').addEventListener('click', drawController.joinRoom);
+  document.querySelector('#room1').addEventListener('click', function (e) {
+    drawController.joinRoom(e.target.id);
+  });
+  document.querySelector('#room2').addEventListener('click', function (e) {
+    drawController.joinRoom(e.target.id);
+  });
 };
 
 reactModule.renderCanvas = renderCanvas;

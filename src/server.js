@@ -29,6 +29,8 @@ const server = http.createServer(app);
 
 const ENUMS = {
   connections: 'connections',
+  room1: 'room1',
+  room2: 'room2'
 };
 
 // pass in the http server into socketio and grab the websocket server as io
@@ -41,33 +43,50 @@ server.listen(port, (err) => {
   console.log(`Listening on port ${port}`);
 })
 
-let globalDrawing = [];
+// todo: dynamically create these
+let drawings = {};
+drawings['room1'] = [];
+drawings['room2'] = [];
 
 const onConnect = (sock) => {
   const socket = sock;
 
   // console.dir(sock.handshake.query.room);
 
-  socket.emit('initDrawing', { drawSteps: globalDrawing });
+  socket.emit('initDrawing', { drawSteps: drawings['room1'] });
   
-  socket.join(ENUMS.connections);
+  socket.join(ENUMS.room1);
 };
 
 const onUpdate = (sock) => {
   const socket = sock;
   
   socket.on('joinRoom', (data) => {
-    console.log(data);
+    if (data.oldRoom === data.newRoom) {
+      return;
+    }
+
+    socket.leave(data.oldRoom);
+    socket.join(data.newRoom);
+    socket.emit('clearDrawing');
+    socket.emit('initDrawing', { drawSteps: drawings[data.newRoom] });
   });
 
   socket.on('pathToServer', (data) => {
-    globalDrawing.push(data);
-    socket.broadcast.to(ENUMS.connections).emit('pathToClient', data);
+    // console.dir(data);
+    const room = data.room;
+    const path = data.path;
+
+    drawings[room].push(path);
+    socket.broadcast.to(room).emit('pathToClient', path);
   });
   
-  socket.on('clearDrawing', () => {
-    globalDrawing = [];
-    io.to(ENUMS.connections).emit('clearDrawing');
+  socket.on('clearDrawing', (data) => {
+    const room = data.room;
+
+    drawings[room] = [];
+
+    io.to(room).emit('clearDrawing');
   });
 };
 

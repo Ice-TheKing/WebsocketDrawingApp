@@ -26,6 +26,7 @@ const DRAW_CONSTS = {
 let drawController = {
   canvas: null,
   ctx: null,
+  room: 'room1', // default
   dragging: false,
   lineWidth: null,
   strokeStyle: null,
@@ -44,7 +45,7 @@ let drawController = {
   },
   
   clearServerDrawing: (e) => {
-    socket.emit('clearDrawing');
+    socket.emit('clearDrawing', { room: drawController.room });
   },
   
   clearLocalCanvas: (e) => {
@@ -63,9 +64,15 @@ let drawController = {
     drawController.colorWheel.attributes[1].value = drawController.ctx.strokeStyle;
   }, 
 
-  joinRoom: (e) => {
-    console.dir(e);
-    // socket.emit('joinRoom', room || 'room1');
+  joinRoom: (room) => {
+    const data = {
+      oldRoom: drawController.room,
+      newRoom: room
+    }
+
+    socket.emit('joinRoom', data);
+
+    drawController.room = room;
   }
 };
 
@@ -107,8 +114,13 @@ const sendPathToServer = (mouseLocation) => {
     style: drawController.strokeStyle,
     width: drawController.lineWidth
   };
+
+  let data = {
+    room: drawController.room,
+    path: path
+  }
   
-  socket.emit('pathToServer', path);
+  socket.emit('pathToServer', data);
 };
 
 const drawPathFromServer = (data) => {
