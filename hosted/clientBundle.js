@@ -37,6 +37,9 @@ var drawController = {
     drawController.strokeStyle = "rgba(".concat(pxData.data[0], ", ").concat(pxData.data[1], ", ").concat(pxData.data[2], ", ").concat(pxData.data[3], ")");
     drawController.ctx.strokeStyle = drawController.strokeStyle;
     drawController.colorWheel.attributes[1].value = drawController.ctx.strokeStyle;
+  },
+  joinRoom: function joinRoom(e) {
+    console.dir(e);
   }
 };
 
@@ -100,7 +103,11 @@ var fillBackground = function fillBackground() {
 };
 
 var init = function init() {
-  socket = io.connect();
+  socket = io.connect({
+    query: {
+      room: 'room1'
+    }
+  });
   setupSocket();
   initDrawPage();
 };
@@ -109,6 +116,7 @@ var initDrawPage = function initDrawPage() {
   reactModule.renderCanvas('content');
   reactModule.renderButtons('leftBar');
   reactModule.renderColorWheel('rightBar');
+  reactModule.setupNavLinks();
   drawController.canvas = document.querySelector('#mainCanvas');
   drawController.ctx = drawController.canvas.getContext('2d');
   drawController.lineWidth = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
@@ -365,9 +373,15 @@ var renderColorWheel = function renderColorWheel(renderLocation) {
   ReactDOM.render(React.createElement(ColorWheel, null), document.getElementById(renderLocation));
 };
 
+var setupNavLinks = function setupNavLinks() {
+  document.querySelector('#room1').addEventListener('click', drawController.joinRoom);
+  document.querySelector('#room2').addEventListener('click', drawController.joinRoom);
+};
+
 reactModule.renderCanvas = renderCanvas;
 reactModule.renderButtons = renderButtons;
 reactModule.renderColorWheel = renderColorWheel;
+reactModule.setupNavLinks = setupNavLinks;
 "use strict";
 
 var touchController = {

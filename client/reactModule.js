@@ -100,6 +100,12 @@ const renderColorWheel = (renderLocation) => {
   );
 };
 
+const setupNavLinks = () => {
+  document.querySelector('#room1').addEventListener('click', drawController.joinRoom);
+  document.querySelector('#room2').addEventListener('click', drawController.joinRoom);
+};
+
 reactModule.renderCanvas = renderCanvas;
 reactModule.renderButtons = renderButtons;
 reactModule.renderColorWheel = renderColorWheel;
+reactModule.setupNavLinks = setupNavLinks;

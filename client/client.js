@@ -61,6 +61,11 @@ let drawController = {
     drawController.ctx.strokeStyle = drawController.strokeStyle;
     
     drawController.colorWheel.attributes[1].value = drawController.ctx.strokeStyle;
+  }, 
+
+  joinRoom: (e) => {
+    console.dir(e);
+    // socket.emit('joinRoom', room || 'room1');
   }
 };
 
@@ -130,11 +135,13 @@ let fillBackground = () => {
 
 const init = () => {
   /* INIT SOCKET */
-  socket = io.connect();
+  socket = io.connect({ query: {
+    room: 'room1'
+  }});
   
   setupSocket();
   initDrawPage();
-}
+};
 
 const initDrawPage = () => {
   /* INIT CANVAS/DRAW APP */
@@ -142,6 +149,7 @@ const initDrawPage = () => {
   reactModule.renderCanvas('content');
   reactModule.renderButtons('leftBar');
   reactModule.renderColorWheel('rightBar');
+  reactModule.setupNavLinks();
   
   // Init Draw Globals
   drawController.canvas = document.querySelector('#mainCanvas');

@@ -46,6 +46,8 @@ let globalDrawing = [];
 const onConnect = (sock) => {
   const socket = sock;
 
+  // console.dir(sock.handshake.query.room);
+
   socket.emit('initDrawing', { drawSteps: globalDrawing });
   
   socket.join(ENUMS.connections);
@@ -54,6 +56,10 @@ const onConnect = (sock) => {
 const onUpdate = (sock) => {
   const socket = sock;
   
+  socket.on('joinRoom', (data) => {
+    console.log(data);
+  });
+
   socket.on('pathToServer', (data) => {
     globalDrawing.push(data);
     socket.broadcast.to(ENUMS.connections).emit('pathToClient', data);
