@@ -84,7 +84,7 @@ const onUpdate = (sock) => {
 
   socket.on('createRoom', (data) => createRoom(data, socket));
   
-  socket.on('joinRoom', (data) => { joinRoom(data.oldRoom, data.newRoom, socket) });
+  socket.on('joinRoom', (data) => joinRoom(data.oldRoom, data.newRoom, socket) );
 
   socket.on('pathToServer', (data) => {
     const room = data.room;

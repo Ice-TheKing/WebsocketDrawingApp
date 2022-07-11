@@ -6,12 +6,13 @@ var DRAW_CONSTS = {
   DEFAULT_STROKE_STYLE: "#ff0000",
   DEFAULT_LINE_CAP: "round",
   DEFAULT_LINE_JOIN: "round",
-  DEFAULT_BACK_COLOR: "lightgray"
+  DEFAULT_BACK_COLOR: "lightgray",
+  DEFAULT_ROOM: "room1"
 };
 var drawController = {
   canvas: null,
   ctx: null,
-  room: 'room1',
+  room: DRAW_CONSTS.DEFAULT_ROOM,
   dragging: false,
   lineWidth: null,
   strokeStyle: null,
@@ -129,7 +130,7 @@ var fillBackground = function fillBackground() {
 var init = function init() {
   socket = io.connect({
     query: {
-      room: 'room1'
+      room: drawController.room
     }
   });
   setupSocket();
