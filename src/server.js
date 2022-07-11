@@ -30,7 +30,7 @@ router(app, path);
 const server = http.createServer(app);
 
 const ENUMS = {
-  defaultRoom: 'room1'
+  defaultRoom: 'ROOM1'
 };
 
 // pass in the http server into socketio and grab the websocket server as io
@@ -46,7 +46,7 @@ server.listen(port, (err) => {
 // todo: dynamically create these
 let drawings = {};
 drawings[ENUMS.defaultRoom] = [];
-drawings['room2'] = [];
+drawings['ROOM2'] = [];
 
 const onConnect = (sock) => {
   const socket = sock;
@@ -59,6 +59,11 @@ const joinRoom = (oldRoom, newRoom, socket) => {
     return;
   }
 
+  if (!drawings[newRoom]) {
+    socket.emit('invalidRoom', { error: 'Room does not exist.' });
+    return;
+  }
+
   socket.leave(oldRoom);
   socket.join(newRoom);
   socket.emit('clearDrawing');
@@ -67,6 +72,8 @@ const joinRoom = (oldRoom, newRoom, socket) => {
 
 const createRoom = (data, socket) => {
   let newID = id.getID();
+
+  console.log(newID);
 
   drawings[newID] = [];
 
@@ -84,7 +91,7 @@ const onUpdate = (sock) => {
 
   socket.on('createRoom', (data) => createRoom(data, socket));
   
-  socket.on('joinRoom', (data) => joinRoom(data.oldRoom, data.newRoom, socket) );
+  socket.on('joinRoom', (data) => joinRoom(data.oldRoom.toUpperCase(), data.newRoom.toUpperCase(), socket) );
 
   socket.on('pathToServer', (data) => {
     const room = data.room;

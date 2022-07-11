@@ -90,6 +90,24 @@ const renderButtons = (renderLocation) => {
     document.getElementById(renderLocation),
     () => {
       document.querySelector('#clearDrawingConfirm').addEventListener('click', drawController.clearServerDrawing);
+
+      document.querySelector('#joinRoomButton').addEventListener('click', (e) => {
+        const id = document.querySelector('#roomInput').value.toUpperCase();
+
+        if (!validateID(id)) {
+          // invalid id
+          $('#invalidRoomAlert').show();
+        } else if (id === drawController.room) {
+          // trying to join the same room we're on, just dismiss the modal
+          $('.modal').modal('hide');
+        } else {
+          // call join room
+          drawController.joinRoom(id);
+        }
+      });
+
+      $('#invalidRoomAlert').hide();
+      $('#roomServerError').hide();
   });
 };
 

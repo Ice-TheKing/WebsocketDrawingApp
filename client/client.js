@@ -21,7 +21,7 @@ const DRAW_CONSTS = {
   DEFAULT_LINE_CAP: "round",
   DEFAULT_LINE_JOIN: "round",
   DEFAULT_BACK_COLOR: "lightgray",
-  DEFAULT_ROOM: "room1"
+  DEFAULT_ROOM: "ROOM1"
 };
 
 let drawController = {
@@ -114,10 +114,19 @@ const setupSocket = () => {
       drawPathFromServer(drawingSteps[i]);
     }
     drawController.lockInput = false;
+
+    // close all modals
+    $('.modal').modal('hide');
   });
   
   socket.on('clearDrawing', (data) => {
     drawController.clearLocalCanvas();
+  });
+
+  socket.on('invalidRoom', (data) => {
+    // display invalid room code in join room modal
+    document.querySelector('#roomServerError').innerHTML = data.error;
+    $('#roomServerError').show();
   });
 };
 

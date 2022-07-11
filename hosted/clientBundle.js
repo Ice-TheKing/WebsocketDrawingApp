@@ -7,7 +7,7 @@ var DRAW_CONSTS = {
   DEFAULT_LINE_CAP: "round",
   DEFAULT_LINE_JOIN: "round",
   DEFAULT_BACK_COLOR: "lightgray",
-  DEFAULT_ROOM: "room1"
+  DEFAULT_ROOM: "ROOM1"
 };
 var drawController = {
   canvas: null,
@@ -89,9 +89,14 @@ var setupSocket = function setupSocket() {
     }
 
     drawController.lockInput = false;
+    $('.modal').modal('hide');
   });
   socket.on('clearDrawing', function (data) {
     drawController.clearLocalCanvas();
+  });
+  socket.on('invalidRoom', function (data) {
+    document.querySelector('#roomServerError').innerHTML = data.error;
+    $('#roomServerError').show();
   });
 };
 
@@ -166,6 +171,23 @@ var initDrawPage = function initDrawPage() {
 $(document).ready(function () {
   init();
 });
+"use strict";
+
+var validateID = function validateID(id) {
+  if (id.length !== 4) {
+    return false;
+  }
+
+  var decimal = parseInt(id, 16);
+  var min = 4369;
+  var max = 65535;
+
+  if (!decimal || decimal < min || decimal > max) {
+    return false;
+  }
+
+  return true;
+};
 "use strict";
 
 var mouseController = {
@@ -391,6 +413,19 @@ var renderCanvas = function renderCanvas(renderLocation) {
 var renderButtons = function renderButtons(renderLocation) {
   ReactDOM.render(React.createElement(Buttons, null), document.getElementById(renderLocation), function () {
     document.querySelector('#clearDrawingConfirm').addEventListener('click', drawController.clearServerDrawing);
+    document.querySelector('#joinRoomButton').addEventListener('click', function (e) {
+      var id = document.querySelector('#roomInput').value.toUpperCase();
+
+      if (!validateID(id)) {
+        $('#invalidRoomAlert').show();
+      } else if (id === drawController.room) {
+        $('.modal').modal('hide');
+      } else {
+        drawController.joinRoom(id);
+      }
+    });
+    $('#invalidRoomAlert').hide();
+    $('#roomServerError').hide();
   });
 };
 
