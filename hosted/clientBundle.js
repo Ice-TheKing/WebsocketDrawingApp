@@ -48,7 +48,6 @@ var drawController = {
       newRoom: room
     };
     socket.emit('joinRoom', data);
-    drawController.room = room;
   },
   createRoom: function createRoom() {
     var data = {
@@ -414,7 +413,7 @@ var renderButtons = function renderButtons(renderLocation) {
   ReactDOM.render(React.createElement(Buttons, null), document.getElementById(renderLocation), function () {
     document.querySelector('#clearDrawingConfirm').addEventListener('click', drawController.clearServerDrawing);
     document.querySelector('#joinRoomButton').addEventListener('click', function (e) {
-      var id = document.querySelector('#roomInput').value.toUpperCase();
+      var id = document.querySelector('#roomInput').value.toUpperCase().trim();
 
       if (!validateID(id)) {
         $('#invalidRoomAlert').show();

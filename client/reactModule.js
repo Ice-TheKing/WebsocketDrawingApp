@@ -92,7 +92,7 @@ const renderButtons = (renderLocation) => {
       document.querySelector('#clearDrawingConfirm').addEventListener('click', drawController.clearServerDrawing);
 
       document.querySelector('#joinRoomButton').addEventListener('click', (e) => {
-        const id = document.querySelector('#roomInput').value.toUpperCase();
+        const id = document.querySelector('#roomInput').value.toUpperCase().trim();
 
         if (!validateID(id)) {
           // invalid id

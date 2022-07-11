@@ -72,8 +72,6 @@ let drawController = {
     }
 
     socket.emit('joinRoom', data);
-
-    drawController.room = room;
   },
 
   createRoom: () => {

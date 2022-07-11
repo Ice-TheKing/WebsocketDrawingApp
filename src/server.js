@@ -94,8 +94,13 @@ const onUpdate = (sock) => {
   socket.on('joinRoom', (data) => joinRoom(data.oldRoom.toUpperCase(), data.newRoom.toUpperCase(), socket) );
 
   socket.on('pathToServer', (data) => {
-    const room = data.room;
+    const room = data.room.toUpperCase();
     const path = data.path;
+
+    if (!drawings[room]) {
+      console.log(room);
+      return;
+    }
 
     drawings[room].push(path);
     socket.broadcast.to(room).emit('pathToClient', path);
