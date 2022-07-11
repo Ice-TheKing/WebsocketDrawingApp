@@ -4,6 +4,8 @@ const http = require('http');
 const path = require('path');
 const socketio = require('socket.io');
 const router = require('./router.js');
+const id = require('./generateID.js');
+const { create } = require('domain');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
@@ -28,9 +30,7 @@ router(app, path);
 const server = http.createServer(app);
 
 const ENUMS = {
-  connections: 'connections',
-  room1: 'room1',
-  room2: 'room2'
+  defaultRoom: 'room1'
 };
 
 // pass in the http server into socketio and grab the websocket server as io
@@ -45,35 +45,48 @@ server.listen(port, (err) => {
 
 // todo: dynamically create these
 let drawings = {};
-drawings['room1'] = [];
+drawings[ENUMS.defaultRoom] = [];
 drawings['room2'] = [];
 
 const onConnect = (sock) => {
   const socket = sock;
 
-  // console.dir(sock.handshake.query.room);
-
-  socket.emit('initDrawing', { drawSteps: drawings['room1'] });
-  
-  socket.join(ENUMS.room1);
+  joinRoom('', ENUMS.defaultRoom, socket);
 };
 
+const joinRoom = (oldRoom, newRoom, socket) => {
+  if (oldRoom === newRoom) {
+    return;
+  }
+
+  socket.leave(oldRoom);
+  socket.join(newRoom);
+  socket.emit('clearDrawing');
+  socket.emit('initDrawing', { drawSteps: drawings[newRoom], newRoom: newRoom });
+};
+
+const createRoom = (data, socket) => {
+  let newID = id.getID();
+
+  drawings[newID] = [];
+
+  joinRoom(data.oldRoom, newID, socket);
+};
+
+/// handles events from client
 const onUpdate = (sock) => {
   const socket = sock;
-  
-  socket.on('joinRoom', (data) => {
-    if (data.oldRoom === data.newRoom) {
-      return;
-    }
 
-    socket.leave(data.oldRoom);
-    socket.join(data.newRoom);
-    socket.emit('clearDrawing');
-    socket.emit('initDrawing', { drawSteps: drawings[data.newRoom] });
-  });
+  /**
+   * TODO: separate these as separate functions and call them from here, e.g.
+   *  socket.on('joinRoom', (data) => joinRoom(data));
+   * */ 
+
+  socket.on('createRoom', (data) => createRoom(data, socket));
+  
+  socket.on('joinRoom', (data) => { joinRoom(data.oldRoom, data.newRoom, socket) });
 
   socket.on('pathToServer', (data) => {
-    // console.dir(data);
     const room = data.room;
     const path = data.path;
 
@@ -91,9 +104,6 @@ const onUpdate = (sock) => {
 };
 
 io.sockets.on('connection', (socket) => {
-  console.log('started');
-
   onConnect(socket);
   onUpdate(socket);
 });
-

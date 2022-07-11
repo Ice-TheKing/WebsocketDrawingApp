@@ -73,6 +73,14 @@ let drawController = {
     socket.emit('joinRoom', data);
 
     drawController.room = room;
+  },
+
+  createRoom: () => {
+    const data = {
+      oldRoom: drawController.room
+    }
+
+    socket.emit('createRoom', data);
   }
 };
 
@@ -94,7 +102,12 @@ const setupSocket = () => {
   
   socket.on('initDrawing', (data) => {
     const drawingSteps = data.drawSteps;
+
+    if (data.newRoom) {
+      drawController.room = data.newRoom;
+    };
     
+    // TODO: taking a second look at this, I think this isn't necessary. This isn't asynchonous, so it will lock the entire window anyway
     drawController.lockInput = true;
     for(let i = 0; i < drawingSteps.length; i++) {
       drawPathFromServer(drawingSteps[i]);

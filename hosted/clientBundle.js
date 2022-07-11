@@ -48,6 +48,12 @@ var drawController = {
     };
     socket.emit('joinRoom', data);
     drawController.room = room;
+  },
+  createRoom: function createRoom() {
+    var data = {
+      oldRoom: drawController.room
+    };
+    socket.emit('createRoom', data);
   }
 };
 
@@ -69,6 +75,12 @@ var setupSocket = function setupSocket() {
   socket.on('pathToClient', drawPathFromServer);
   socket.on('initDrawing', function (data) {
     var drawingSteps = data.drawSteps;
+
+    if (data.newRoom) {
+      drawController.room = data.newRoom;
+    }
+
+    ;
     drawController.lockInput = true;
 
     for (var i = 0; i < drawingSteps.length; i++) {
@@ -391,6 +403,9 @@ var setupNavLinks = function setupNavLinks() {
   });
   document.querySelector('#room2').addEventListener('click', function (e) {
     drawController.joinRoom(e.target.id);
+  });
+  document.querySelector('#createRoom').addEventListener('click', function (e) {
+    drawController.createRoom();
   });
 };
 

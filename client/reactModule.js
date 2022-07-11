@@ -107,6 +107,9 @@ const setupNavLinks = () => {
   document.querySelector('#room2').addEventListener('click', (e) => {
     drawController.joinRoom(e.target.id);
   });
+  document.querySelector('#createRoom').addEventListener('click', (e) => {
+    drawController.createRoom();
+  });
 };
 
 reactModule.renderCanvas = renderCanvas;
