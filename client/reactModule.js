@@ -26,6 +26,11 @@ class Buttons extends React.Component {
         <input type="range" className="tool" min="1" max="20" id="lineWidth" />
         
         <button type="button" className="btn btn-danger tool" id="clearButton" data-toggle="modal" data-target="#clearModal">Clear</button>
+
+        <div className="tool invisible" id="roomCode">
+          Room Code: <button type="button" className="btn btn-light" id="roomCodeButton"></button>
+        </div>
+        
         </div>
         
         <div className="modal fade" id="clearModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -106,9 +111,20 @@ const renderButtons = (renderLocation) => {
         }
       });
 
+      // roomCodeButton onclick: copy text to clipboard
+      document.querySelector('#roomCodeButton').addEventListener('click', (e) => {
+        const roomCode = e.target.innerHTML;
+        navigator.clipboard.writeText(roomCode);
+      });
+
       $('#invalidRoomAlert').hide();
       $('#roomServerError').hide();
   });
+};
+
+const displayRoomCode = (roomCode) => {
+  document.querySelector('#roomCodeButton').innerHTML = roomCode;
+  $('#roomCode').removeClass('invisible');
 };
 
 const renderColorWheel = (renderLocation) => {
@@ -134,3 +150,4 @@ reactModule.renderCanvas = renderCanvas;
 reactModule.renderButtons = renderButtons;
 reactModule.renderColorWheel = renderColorWheel;
 reactModule.setupNavLinks = setupNavLinks;
+reactModule.displayRoomCode = displayRoomCode;

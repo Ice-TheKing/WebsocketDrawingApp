@@ -89,6 +89,10 @@ var setupSocket = function setupSocket() {
 
     drawController.lockInput = false;
     $('.modal').modal('hide');
+
+    if (drawController.room !== DRAW_CONSTS.DEFAULT_ROOM) {
+      reactModule.displayRoomCode(drawController.room);
+    }
   });
   socket.on('clearDrawing', function (data) {
     drawController.clearLocalCanvas();
@@ -333,7 +337,14 @@ var Buttons = function (_React$Component2) {
         id: "clearButton",
         "data-toggle": "modal",
         "data-target": "#clearModal"
-      }, "Clear")), React.createElement("div", {
+      }, "Clear"), React.createElement("div", {
+        className: "tool invisible",
+        id: "roomCode"
+      }, "Room Code: ", React.createElement("button", {
+        type: "button",
+        className: "btn btn-light",
+        id: "roomCodeButton"
+      }))), React.createElement("div", {
         className: "modal fade",
         id: "clearModal",
         tabindex: "-1",
@@ -423,9 +434,18 @@ var renderButtons = function renderButtons(renderLocation) {
         drawController.joinRoom(id);
       }
     });
+    document.querySelector('#roomCodeButton').addEventListener('click', function (e) {
+      var roomCode = e.target.innerHTML;
+      navigator.clipboard.writeText(roomCode);
+    });
     $('#invalidRoomAlert').hide();
     $('#roomServerError').hide();
   });
+};
+
+var displayRoomCode = function displayRoomCode(roomCode) {
+  document.querySelector('#roomCodeButton').innerHTML = roomCode;
+  $('#roomCode').removeClass('invisible');
 };
 
 var renderColorWheel = function renderColorWheel(renderLocation) {
@@ -448,6 +468,7 @@ reactModule.renderCanvas = renderCanvas;
 reactModule.renderButtons = renderButtons;
 reactModule.renderColorWheel = renderColorWheel;
 reactModule.setupNavLinks = setupNavLinks;
+reactModule.displayRoomCode = displayRoomCode;
 "use strict";
 
 var touchController = {

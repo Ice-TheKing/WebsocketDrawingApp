@@ -115,6 +115,11 @@ const setupSocket = () => {
 
     // close all modals
     $('.modal').modal('hide');
+
+    // set room code if not default room
+    if (drawController.room !== DRAW_CONSTS.DEFAULT_ROOM) {
+      reactModule.displayRoomCode(drawController.room);
+    }
   });
   
   socket.on('clearDrawing', (data) => {
