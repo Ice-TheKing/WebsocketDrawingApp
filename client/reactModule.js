@@ -135,11 +135,10 @@ const renderColorWheel = (renderLocation) => {
 };
 
 const setupNavLinks = () => {
-  document.querySelector('#room1').addEventListener('click', (e) => {
-    drawController.joinRoom(e.target.id);
-  });
-  document.querySelector('#room2').addEventListener('click', (e) => {
-    drawController.joinRoom(e.target.id);
+  // Banner text ("Real-time Drawing App") takes you back to default room
+  document.querySelector('#bannerText').addEventListener('click', (e) => {
+    $('#roomCode').addClass('invisible');
+    drawController.joinRoom(DRAW_CONSTS.DEFAULT_ROOM);
   });
   document.querySelector('#createRoom').addEventListener('click', (e) => {
     drawController.createRoom();

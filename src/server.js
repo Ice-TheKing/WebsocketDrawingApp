@@ -46,7 +46,6 @@ server.listen(port, (err) => {
 // todo: dynamically create these
 let drawings = {};
 drawings[ENUMS.defaultRoom] = [];
-drawings['ROOM2'] = [];
 
 const onConnect = (sock) => {
   const socket = sock;

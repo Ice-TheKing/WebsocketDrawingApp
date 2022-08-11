@@ -453,11 +453,9 @@ var renderColorWheel = function renderColorWheel(renderLocation) {
 };
 
 var setupNavLinks = function setupNavLinks() {
-  document.querySelector('#room1').addEventListener('click', function (e) {
-    drawController.joinRoom(e.target.id);
-  });
-  document.querySelector('#room2').addEventListener('click', function (e) {
-    drawController.joinRoom(e.target.id);
+  document.querySelector('#bannerText').addEventListener('click', function (e) {
+    $('#roomCode').addClass('invisible');
+    drawController.joinRoom(DRAW_CONSTS.DEFAULT_ROOM);
   });
   document.querySelector('#createRoom').addEventListener('click', function (e) {
     drawController.createRoom();
