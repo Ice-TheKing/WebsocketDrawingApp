@@ -6,11 +6,13 @@ var DRAW_CONSTS = {
   DEFAULT_STROKE_STYLE: "#ff0000",
   DEFAULT_LINE_CAP: "round",
   DEFAULT_LINE_JOIN: "round",
-  DEFAULT_BACK_COLOR: "lightgray"
+  DEFAULT_BACK_COLOR: "lightgray",
+  DEFAULT_ROOM: "ROOM1"
 };
 var drawController = {
   canvas: null,
   ctx: null,
+  room: DRAW_CONSTS.DEFAULT_ROOM,
   dragging: false,
   lineWidth: null,
   strokeStyle: null,
@@ -26,7 +28,9 @@ var drawController = {
     drawController.strokeStyle = hexColor;
   },
   clearServerDrawing: function clearServerDrawing(e) {
-    socket.emit('clearDrawing');
+    socket.emit('clearDrawing', {
+      room: drawController.room
+    });
   },
   clearLocalCanvas: function clearLocalCanvas(e) {
     drawController.ctx.clearRect(0, 0, drawController.ctx.canvas.width, drawController.ctx.canvas.height);
@@ -37,6 +41,19 @@ var drawController = {
     drawController.strokeStyle = "rgba(".concat(pxData.data[0], ", ").concat(pxData.data[1], ", ").concat(pxData.data[2], ", ").concat(pxData.data[3], ")");
     drawController.ctx.strokeStyle = drawController.strokeStyle;
     drawController.colorWheel.attributes[1].value = drawController.ctx.strokeStyle;
+  },
+  joinRoom: function joinRoom(room) {
+    var data = {
+      oldRoom: drawController.room,
+      newRoom: room
+    };
+    socket.emit('joinRoom', data);
+  },
+  createRoom: function createRoom() {
+    var data = {
+      oldRoom: drawController.room
+    };
+    socket.emit('createRoom', data);
   }
 };
 
@@ -58,6 +75,12 @@ var setupSocket = function setupSocket() {
   socket.on('pathToClient', drawPathFromServer);
   socket.on('initDrawing', function (data) {
     var drawingSteps = data.drawSteps;
+
+    if (data.newRoom) {
+      drawController.room = data.newRoom;
+    }
+
+    ;
     drawController.lockInput = true;
 
     for (var i = 0; i < drawingSteps.length; i++) {
@@ -65,9 +88,18 @@ var setupSocket = function setupSocket() {
     }
 
     drawController.lockInput = false;
+    $('.modal').modal('hide');
+
+    if (drawController.room !== DRAW_CONSTS.DEFAULT_ROOM) {
+      reactModule.displayRoomCode(drawController.room);
+    }
   });
   socket.on('clearDrawing', function (data) {
     drawController.clearLocalCanvas();
+  });
+  socket.on('invalidRoom', function (data) {
+    document.querySelector('#roomServerError').innerHTML = data.error;
+    $('#roomServerError').show();
   });
 };
 
@@ -78,7 +110,11 @@ var sendPathToServer = function sendPathToServer(mouseLocation) {
     style: drawController.strokeStyle,
     width: drawController.lineWidth
   };
-  socket.emit('pathToServer', path);
+  var data = {
+    room: drawController.room,
+    path: path
+  };
+  socket.emit('pathToServer', data);
 };
 
 var drawPathFromServer = function drawPathFromServer(data) {
@@ -100,7 +136,11 @@ var fillBackground = function fillBackground() {
 };
 
 var init = function init() {
-  socket = io.connect();
+  socket = io.connect({
+    query: {
+      room: drawController.room
+    }
+  });
   setupSocket();
   initDrawPage();
 };
@@ -109,6 +149,7 @@ var initDrawPage = function initDrawPage() {
   reactModule.renderCanvas('content');
   reactModule.renderButtons('leftBar');
   reactModule.renderColorWheel('rightBar');
+  reactModule.setupNavLinks();
   drawController.canvas = document.querySelector('#mainCanvas');
   drawController.ctx = drawController.canvas.getContext('2d');
   drawController.lineWidth = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
@@ -133,6 +174,23 @@ var initDrawPage = function initDrawPage() {
 $(document).ready(function () {
   init();
 });
+"use strict";
+
+var validateID = function validateID(id) {
+  if (id.length !== 4) {
+    return false;
+  }
+
+  var decimal = parseInt(id, 16);
+  var min = 4369;
+  var max = 65535;
+
+  if (!decimal || decimal < min || decimal > max) {
+    return false;
+  }
+
+  return true;
+};
 "use strict";
 
 var mouseController = {
@@ -279,7 +337,14 @@ var Buttons = function (_React$Component2) {
         id: "clearButton",
         "data-toggle": "modal",
         "data-target": "#clearModal"
-      }, "Clear")), React.createElement("div", {
+      }, "Clear"), React.createElement("div", {
+        className: "tool invisible",
+        id: "roomCode"
+      }, "Room Code: ", React.createElement("button", {
+        type: "button",
+        className: "btn btn-light",
+        id: "roomCodeButton"
+      }))), React.createElement("div", {
         className: "modal fade",
         id: "clearModal",
         tabindex: "-1",
@@ -358,16 +423,52 @@ var renderCanvas = function renderCanvas(renderLocation) {
 var renderButtons = function renderButtons(renderLocation) {
   ReactDOM.render(React.createElement(Buttons, null), document.getElementById(renderLocation), function () {
     document.querySelector('#clearDrawingConfirm').addEventListener('click', drawController.clearServerDrawing);
+    document.querySelector('#joinRoomButton').addEventListener('click', function (e) {
+      var id = document.querySelector('#roomInput').value.toUpperCase().trim();
+
+      if (!validateID(id)) {
+        $('#invalidRoomAlert').show();
+      } else if (id === drawController.room) {
+        $('.modal').modal('hide');
+      } else {
+        drawController.joinRoom(id);
+      }
+    });
+    document.querySelector('#roomCodeButton').addEventListener('click', function (e) {
+      var roomCode = e.target.innerHTML;
+      navigator.clipboard.writeText(roomCode);
+    });
+    $('#invalidRoomAlert').hide();
+    $('#roomServerError').hide();
   });
+};
+
+var displayRoomCode = function displayRoomCode(roomCode) {
+  document.querySelector('#roomCodeButton').innerHTML = roomCode;
+  $('#roomCode').removeClass('invisible');
 };
 
 var renderColorWheel = function renderColorWheel(renderLocation) {
   ReactDOM.render(React.createElement(ColorWheel, null), document.getElementById(renderLocation));
 };
 
+var setupNavLinks = function setupNavLinks() {
+  document.querySelector('#room1').addEventListener('click', function (e) {
+    drawController.joinRoom(e.target.id);
+  });
+  document.querySelector('#room2').addEventListener('click', function (e) {
+    drawController.joinRoom(e.target.id);
+  });
+  document.querySelector('#createRoom').addEventListener('click', function (e) {
+    drawController.createRoom();
+  });
+};
+
 reactModule.renderCanvas = renderCanvas;
 reactModule.renderButtons = renderButtons;
 reactModule.renderColorWheel = renderColorWheel;
+reactModule.setupNavLinks = setupNavLinks;
+reactModule.displayRoomCode = displayRoomCode;
 "use strict";
 
 var touchController = {

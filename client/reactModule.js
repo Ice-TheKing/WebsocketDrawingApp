@@ -26,6 +26,11 @@ class Buttons extends React.Component {
         <input type="range" className="tool" min="1" max="20" id="lineWidth" />
         
         <button type="button" className="btn btn-danger tool" id="clearButton" data-toggle="modal" data-target="#clearModal">Clear</button>
+
+        <div className="tool invisible" id="roomCode">
+          Room Code: <button type="button" className="btn btn-light" id="roomCodeButton"></button>
+        </div>
+        
         </div>
         
         <div className="modal fade" id="clearModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -90,7 +95,36 @@ const renderButtons = (renderLocation) => {
     document.getElementById(renderLocation),
     () => {
       document.querySelector('#clearDrawingConfirm').addEventListener('click', drawController.clearServerDrawing);
+
+      document.querySelector('#joinRoomButton').addEventListener('click', (e) => {
+        const id = document.querySelector('#roomInput').value.toUpperCase().trim();
+
+        if (!validateID(id)) {
+          // invalid id
+          $('#invalidRoomAlert').show();
+        } else if (id === drawController.room) {
+          // trying to join the same room we're on, just dismiss the modal
+          $('.modal').modal('hide');
+        } else {
+          // call join room
+          drawController.joinRoom(id);
+        }
+      });
+
+      // roomCodeButton onclick: copy text to clipboard
+      document.querySelector('#roomCodeButton').addEventListener('click', (e) => {
+        const roomCode = e.target.innerHTML;
+        navigator.clipboard.writeText(roomCode);
+      });
+
+      $('#invalidRoomAlert').hide();
+      $('#roomServerError').hide();
   });
+};
+
+const displayRoomCode = (roomCode) => {
+  document.querySelector('#roomCodeButton').innerHTML = roomCode;
+  $('#roomCode').removeClass('invisible');
 };
 
 const renderColorWheel = (renderLocation) => {
@@ -100,6 +134,20 @@ const renderColorWheel = (renderLocation) => {
   );
 };
 
+const setupNavLinks = () => {
+  document.querySelector('#room1').addEventListener('click', (e) => {
+    drawController.joinRoom(e.target.id);
+  });
+  document.querySelector('#room2').addEventListener('click', (e) => {
+    drawController.joinRoom(e.target.id);
+  });
+  document.querySelector('#createRoom').addEventListener('click', (e) => {
+    drawController.createRoom();
+  });
+};
+
 reactModule.renderCanvas = renderCanvas;
 reactModule.renderButtons = renderButtons;
 reactModule.renderColorWheel = renderColorWheel;
+reactModule.setupNavLinks = setupNavLinks;
+reactModule.displayRoomCode = displayRoomCode;

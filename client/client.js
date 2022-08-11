@@ -20,12 +20,14 @@ const DRAW_CONSTS = {
   DEFAULT_STROKE_STYLE: "#ff0000",
   DEFAULT_LINE_CAP: "round",
   DEFAULT_LINE_JOIN: "round",
-  DEFAULT_BACK_COLOR: "lightgray"
+  DEFAULT_BACK_COLOR: "lightgray",
+  DEFAULT_ROOM: "ROOM1"
 };
 
 let drawController = {
   canvas: null,
   ctx: null,
+  room: DRAW_CONSTS.DEFAULT_ROOM,
   dragging: false,
   lineWidth: null,
   strokeStyle: null,
@@ -44,7 +46,7 @@ let drawController = {
   },
   
   clearServerDrawing: (e) => {
-    socket.emit('clearDrawing');
+    socket.emit('clearDrawing', { room: drawController.room });
   },
   
   clearLocalCanvas: (e) => {
@@ -61,6 +63,23 @@ let drawController = {
     drawController.ctx.strokeStyle = drawController.strokeStyle;
     
     drawController.colorWheel.attributes[1].value = drawController.ctx.strokeStyle;
+  }, 
+
+  joinRoom: (room) => {
+    const data = {
+      oldRoom: drawController.room,
+      newRoom: room
+    }
+
+    socket.emit('joinRoom', data);
+  },
+
+  createRoom: () => {
+    const data = {
+      oldRoom: drawController.room
+    }
+
+    socket.emit('createRoom', data);
   }
 };
 
@@ -82,16 +101,35 @@ const setupSocket = () => {
   
   socket.on('initDrawing', (data) => {
     const drawingSteps = data.drawSteps;
+
+    if (data.newRoom) {
+      drawController.room = data.newRoom;
+    };
     
+    // TODO: taking a second look at this, I think this isn't necessary. This isn't asynchonous, so it will lock the entire window anyway
     drawController.lockInput = true;
     for(let i = 0; i < drawingSteps.length; i++) {
       drawPathFromServer(drawingSteps[i]);
     }
     drawController.lockInput = false;
+
+    // close all modals
+    $('.modal').modal('hide');
+
+    // set room code if not default room
+    if (drawController.room !== DRAW_CONSTS.DEFAULT_ROOM) {
+      reactModule.displayRoomCode(drawController.room);
+    }
   });
   
   socket.on('clearDrawing', (data) => {
     drawController.clearLocalCanvas();
+  });
+
+  socket.on('invalidRoom', (data) => {
+    // display invalid room code in join room modal
+    document.querySelector('#roomServerError').innerHTML = data.error;
+    $('#roomServerError').show();
   });
 };
 
@@ -102,8 +140,13 @@ const sendPathToServer = (mouseLocation) => {
     style: drawController.strokeStyle,
     width: drawController.lineWidth
   };
+
+  let data = {
+    room: drawController.room,
+    path: path
+  }
   
-  socket.emit('pathToServer', path);
+  socket.emit('pathToServer', data);
 };
 
 const drawPathFromServer = (data) => {
@@ -130,11 +173,13 @@ let fillBackground = () => {
 
 const init = () => {
   /* INIT SOCKET */
-  socket = io.connect();
+  socket = io.connect({ query: {
+    room: drawController.room
+  }});
   
   setupSocket();
   initDrawPage();
-}
+};
 
 const initDrawPage = () => {
   /* INIT CANVAS/DRAW APP */
@@ -142,6 +187,7 @@ const initDrawPage = () => {
   reactModule.renderCanvas('content');
   reactModule.renderButtons('leftBar');
   reactModule.renderColorWheel('rightBar');
+  reactModule.setupNavLinks();
   
   // Init Draw Globals
   drawController.canvas = document.querySelector('#mainCanvas');
@@ -173,8 +219,6 @@ const initDrawPage = () => {
   const lineWidthSlider = document.querySelector('#lineWidth');
   lineWidthSlider.value = DRAW_CONSTS.DEFAULT_LINE_WIDTH;
   lineWidthSlider.onchange = drawController.changeLineWidth;
-  
-  //document.querySelector('#clearButton').addEventListener('click', drawController.clearServerDrawing);
 }
 
 $(document).ready(function(){
